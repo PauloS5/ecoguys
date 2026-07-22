@@ -1,10 +1,15 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { EnvironmentalIndicator, EnvironmentalAlert } from '../models/environment.model';
+import { catchError, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EnvironmentService {
+  private http = inject(HttpClient);
+  private apiUrl = 'http://localhost:8000/api/v1';
+
   selectedCity = signal<string>('Rio Branco - AC');
 
   indicators = signal<EnvironmentalIndicator[]>([
@@ -21,7 +26,37 @@ export class EnvironmentService {
 
   alerts = signal<EnvironmentalAlert[]>([]);
 
+  constructor() {
+    this.fetchData(this.selectedCity());
+  }
+
   updateCity(city: string): void {
     this.selectedCity.set(city);
+    this.fetchData(city);
+  }
+
+  fetchData(city: string): void {
+    this.http.get<EnvironmentalIndicator[]>(`${this.apiUrl}/indicators?city=${encodeURIComponent(city)}`)
+      .pipe(
+        catchError(() => {
+          // Mantém as chaves vazias ou limpas caso a API falhe temporariamente
+          return of([]);
+        })
+      )
+      .subscribe(data => {
+        if (data && data.length > 0) {
+          this.indicators.set(data);
+        }
+      });
+
+    this.http.get<EnvironmentalAlert[]>(`${this.apiUrl}/alerts?city=${encodeURIComponent(city)}`)
+      .pipe(
+        catchError(() => {
+          return of([]);
+        })
+      )
+      .subscribe(data => {
+        this.alerts.set(data);
+      });
   }
 }
