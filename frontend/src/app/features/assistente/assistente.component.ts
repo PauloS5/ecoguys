@@ -407,34 +407,9 @@ export class AssistantComponent {
 
   async sendMessage(): Promise<void> {
     if (!this.messageText.trim()) return;
-<<<<<<< HEAD
-
     const userText = this.messageText;
-    const userMsg: ChatMessage = {
-      id: Date.now().toString(),
-      sender: 'user',
-      text: userText,
-      timestamp: new Date()
-    };
-
-    this.gemmaService.chatHistory.update(list => [...list, userMsg]);
     this.messageText = '';
-
-    // Adiciona um feedback visual temporário, se quiser, ou só aguarda:
-    const aiResponse = await this.gemmaService.sendMessageToBackend(userText);
-    
-    const gemmaMsg: ChatMessage = {
-      id: (Date.now() + 1).toString(),
-      sender: 'gemma',
-      text: aiResponse,
-      timestamp: new Date()
-    };
-    
-    this.gemmaService.chatHistory.update(list => [...list, gemmaMsg]);
-=======
-    const text = this.messageText;
-    this.messageText = '';
-    this.gemmaService.askGemma(text);
+    this.gemmaService.askGemma(userText);
   }
 
   clearChat(): void {
@@ -446,6 +421,5 @@ export class AssistantComponent {
         timestamp: new Date()
       }
     ]);
->>>>>>> 4e456ae (Front: correção de bugs e atualizações)
   }
 }

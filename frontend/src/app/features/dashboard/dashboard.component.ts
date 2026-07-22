@@ -1,7 +1,7 @@
 import { Component, AfterViewInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { EnvironmentService } from '../../core/services/environment.service';
 
@@ -11,7 +11,7 @@ declare const Chart: any;
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, HttpClientModule],
   template: `
     <!-- SKELETON LOADER (Telas de carregamento lento/internet lenta) -->
     <div *ngIf="isLoading" class="dashboard-grid-layout">
