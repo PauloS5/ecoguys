@@ -1,15 +1,32 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ChatMessage, AutomaticReport } from '../models/environment.model';
+<<<<<<< HEAD
 import { catchError, of } from 'rxjs';
+=======
+<<<<<<< HEAD
+import { firstValueFrom } from 'rxjs';
+=======
+import { catchError, of } from 'rxjs';
+>>>>>>> 4e456ae (Front: correção de bugs e atualizações)
+>>>>>>> 3701c4f982dc1f66370f082dd01db1137a08470a
 
 @Injectable({
   providedIn: 'root'
 })
 export class GemmaAiService {
   private http = inject(HttpClient);
+<<<<<<< HEAD
   private apiUrl = 'http://localhost:8000/api/v1';
 
+=======
+<<<<<<< HEAD
+  
+=======
+  private apiUrl = 'http://localhost:8000/api/v1';
+
+>>>>>>> 4e456ae (Front: correção de bugs e atualizações)
+>>>>>>> 3701c4f982dc1f66370f082dd01db1137a08470a
   chatHistory = signal<ChatMessage[]>([
     {
       id: 'welcome',
@@ -29,6 +46,21 @@ export class GemmaAiService {
     'Faça um resumo ambiental desta semana.'
   ];
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+  async sendMessageToBackend(prompt: string): Promise<string> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{response: string}>('http://127.0.0.1:8000/api/chat', { prompt })
+      );
+      return response.response;
+    } catch (error) {
+      console.error('Erro ao conectar com a IA:', error);
+      return 'Desculpe, ocorreu um erro ao conectar com o servidor da Inteligência Artificial. Verifique se o backend está rodando.';
+    }
+=======
+>>>>>>> 3701c4f982dc1f66370f082dd01db1137a08470a
   askGemma(question: string): void {
     if (!question.trim()) return;
 
@@ -64,5 +96,9 @@ export class GemmaAiService {
         this.chatHistory.update(list => [...list, gemmaMsg]);
         this.isTyping.set(false);
       });
+<<<<<<< HEAD
+=======
+>>>>>>> 4e456ae (Front: correção de bugs e atualizações)
+>>>>>>> 3701c4f982dc1f66370f082dd01db1137a08470a
   }
 }

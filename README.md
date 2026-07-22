@@ -18,6 +18,32 @@ O **EcoWatch AI** é um sistema de acompanhamento de indicadores ambientais (tem
 | **Chart.js** | Gráficos de evolução dos indicadores |
 | **Lucide Icons** | Biblioteca de ícones da interface |
 | **Poppins (Google Fonts)** | Tipografia oficial |
+| **Python** | Integração backend e consumo da API de Inteligência Artificial |
+| **Gemma 3 4B** | Modelo de Inteligência Artificial (LLM) do Google |
+| **LM Studio** | Servidor local para inferência da IA no formato OpenAI |
+| **Ngrok** | Túnel seguro para exposição da API de IA local para a internet |
+
+---
+
+## 🧠 Arquitetura de Inteligência Artificial (Servidor Local)
+
+Para evitar os altos custos de servidores com GPU na nuvem, nossa IA roda localmente na máquina hospedeira. O projeto consome o modelo **Gemma 3 4B** servido via **LM Studio**.
+
+### Como configurar o Servidor de IA
+1. Instale o [LM Studio](https://lmstudio.ai/).
+2. Baixe o modelo `google/gemma-3-4b` (versão Q4_K_M).
+3. Na aba **Load**, defina o **Context Length** para `8192` tokens para garantir respostas instantâneas.
+4. Na aba **Local Server**, vá em **Server Settings** e ative:
+   - `Serve on Local Network` (host `0.0.0.0`)
+   - `Enable CORS`
+5. Inicie o servidor. Ele rodará localmente na porta `1234`.
+
+### 🌐 Expondo a API (Túnel Ngrok)
+Como a IA roda localmente, utilizamos o **Ngrok** para criar uma ponte entre a aplicação na nuvem e o computador hospedeiro.
+No terminal da máquina rodando o LM Studio, execute:
+`ngrok http 1234`
+
+O link público gerado (ex: `https://<hash>.ngrok-free.dev/v1`) deve ser inserido nas variáveis de ambiente do backend Python para que ele consiga se comunicar com o Gemma.
 
 ---
 
@@ -58,8 +84,8 @@ Os arquivos estáticos otimizados serão gerados em `frontend/dist/frontend`.
 
 ```
 ecoguys/
-├── backend/                      # Pasta reservada para a API backend (Spring Boot / Node.js)
-│   └── LEIAME.md                 # Guia de integração para o backend
+├── backend/                      # API em Python para comunicação com o Ngrok e Frontend
+│   └── requirements.txt          # Dependências do Python (openai, requests, etc.)
 ├── docs/
 │   └── concept.md                # Especificação conceitual do sistema
 ├── frontend/                     # Aplicação Frontend em Angular 18

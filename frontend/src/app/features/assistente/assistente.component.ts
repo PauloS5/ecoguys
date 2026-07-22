@@ -405,10 +405,40 @@ export class AssistantComponent {
     this.gemmaService.askGemma(text);
   }
 
-  sendMessage(): void {
+  async sendMessage(): Promise<void> {
     if (!this.messageText.trim()) return;
+<<<<<<< HEAD
     const text = this.messageText;
     this.messageText = '';
+=======
+<<<<<<< HEAD
+
+    const userText = this.messageText;
+    const userMsg: ChatMessage = {
+      id: Date.now().toString(),
+      sender: 'user',
+      text: userText,
+      timestamp: new Date()
+    };
+
+    this.gemmaService.chatHistory.update(list => [...list, userMsg]);
+    this.messageText = '';
+
+    // Adiciona um feedback visual temporário, se quiser, ou só aguarda:
+    const aiResponse = await this.gemmaService.sendMessageToBackend(userText);
+    
+    const gemmaMsg: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      sender: 'gemma',
+      text: aiResponse,
+      timestamp: new Date()
+    };
+    
+    this.gemmaService.chatHistory.update(list => [...list, gemmaMsg]);
+=======
+    const text = this.messageText;
+    this.messageText = '';
+>>>>>>> 3701c4f982dc1f66370f082dd01db1137a08470a
     this.gemmaService.askGemma(text);
   }
 
@@ -421,5 +451,9 @@ export class AssistantComponent {
         timestamp: new Date()
       }
     ]);
+<<<<<<< HEAD
+=======
+>>>>>>> 4e456ae (Front: correção de bugs e atualizações)
+>>>>>>> 3701c4f982dc1f66370f082dd01db1137a08470a
   }
 }
