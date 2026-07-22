@@ -1,9 +1,19 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai import OpenAI
 import os
 
 app = FastAPI(title="EcoGuys AI API", description="API para conectar com o modelo Gemma via Ngrok")
+
+# Configuração do CORS para permitir que o frontend acesse o backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permite de qualquer origem (útil para o Live Server)
+    allow_credentials=True,
+    allow_methods=["*"],  # Permite todos os métodos (GET, POST, etc.)
+    allow_headers=["*"],  # Permite todos os cabeçalhos
+)
 
 # Inicializa o cliente da OpenAI apontando para o servidor local exposto no Ngrok
 client = OpenAI(

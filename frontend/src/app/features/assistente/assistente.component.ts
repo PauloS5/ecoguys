@@ -94,17 +94,30 @@ export class AssistantComponent {
     this.sendMessage();
   }
 
-  sendMessage(): void {
+  async sendMessage(): Promise<void> {
     if (!this.messageText.trim()) return;
 
-    const newMsg: ChatMessage = {
+    const userText = this.messageText;
+    const userMsg: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
-      text: this.messageText,
+      text: userText,
       timestamp: new Date()
     };
 
-    this.gemmaService.chatHistory.update(list => [...list, newMsg]);
+    this.gemmaService.chatHistory.update(list => [...list, userMsg]);
     this.messageText = '';
+
+    // Adiciona um feedback visual temporário, se quiser, ou só aguarda:
+    const aiResponse = await this.gemmaService.sendMessageToBackend(userText);
+    
+    const gemmaMsg: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      sender: 'gemma',
+      text: aiResponse,
+      timestamp: new Date()
+    };
+    
+    this.gemmaService.chatHistory.update(list => [...list, gemmaMsg]);
   }
 }
