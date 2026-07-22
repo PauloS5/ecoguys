@@ -4,9 +4,14 @@ from pydantic import BaseModel
 from openai import OpenAI
 import os
 import requests
+import time
 
 API_KEY = "ca8e74511637ad32870a4d271daa693c"
 BASE_URL = "https://api.openweathermap.org/data/2.5"
+
+CACHE_EXPIRATION = 300  # 5 minutos de cache
+clima_cache = {}
+previsao_cache = {}
 
 
 def obter_clima_atual(cidade: str, uf: str) -> dict:
@@ -27,10 +32,17 @@ def obter_clima_atual(cidade: str, uf: str) -> dict:
         "units": "metric"
     }
 
+    key = f"{cidade.lower()}-{uf.lower()}"
+    now = time.time()
+    if key in clima_cache and now - clima_cache[key]['time'] < CACHE_EXPIRATION:
+        return clima_cache[key]['data']
+
     response = requests.get(url, params=params)
     response.raise_for_status()
-
-    return response.json()
+    data = response.json()
+    
+    clima_cache[key] = {'time': now, 'data': data}
+    return data
 
 
 def obter_previsao(cidade: str, uf: str) -> dict:
@@ -51,10 +63,17 @@ def obter_previsao(cidade: str, uf: str) -> dict:
         "units": "metric"
     }
 
+    key = f"{cidade.lower()}-{uf.lower()}"
+    now = time.time()
+    if key in previsao_cache and now - previsao_cache[key]['time'] < CACHE_EXPIRATION:
+        return previsao_cache[key]['data']
+
     response = requests.get(url, params=params)
     response.raise_for_status()
-
-    return response.json()
+    data = response.json()
+    
+    previsao_cache[key] = {'time': now, 'data': data}
+    return data
 
 app = FastAPI(title="EcoGuys AI API", description="API para conectar com o modelo Gemma via Ngrok")
 
