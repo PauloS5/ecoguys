@@ -47,36 +47,50 @@ O link público gerado (ex: `https://<hash>.ngrok-free.dev/v1`) deve ser inserid
 
 ---
 
-## 🚀 Como Iniciar
+## 🚀 Como Iniciar (Passo a Passo)
 
 ### Pré-requisitos
-
 - **Node.js** versão 18 ou superior
-- **npm** versão 9 ou superior
+- **Python** versão 3.10 ou superior
+- **Git**
 
-### Passos para Execução
+### Passo 1: Executando o Backend (API em Python)
+O backend é responsável por buscar os dados climáticos e se comunicar com a IA local.
+1. Abra um terminal e acesse a pasta do backend:
+   ```bash
+   cd backend
+   ```
+2. Instale as bibliotecas necessárias (FastAPI, Uvicorn, etc):
+   ```bash
+   py -m pip install -r requirements.txt
+   ```
+   *(Nota: Se estiver usando Linux/Mac, substitua `py -m pip` por `pip3`)*
+3. Inicie o servidor do FastAPI:
+   ```bash
+   py -m uvicorn main:app --reload
+   ```
+4. O servidor do backend rodará em `http://127.0.0.1:8000`. **Deixe este terminal aberto!**
 
-```bash
-# 1. Acesse a pasta do frontend
-cd frontend
+### Passo 2: Executando o Frontend (Angular)
+1. Abra um **novo terminal** (sem fechar o do backend) e acesse a pasta do frontend:
+   ```bash
+   cd frontend
+   ```
+2. Instale as dependências:
+   ```bash
+   npm install
+   ```
+3. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm start
+   ```
+4. O aplicativo estará acessível no seu navegador em **http://localhost:4200**.
 
-# 2. Instale as dependências
-npm install
-
-# 3. Inicie o servidor de desenvolvimento
-npm start
-```
-
-O aplicativo estará acessível em **http://localhost:4200**.
-
-### Build de Produção
-
-```bash
-cd frontend
-npm run build
-```
-
-Os arquivos estáticos otimizados serão gerados em `frontend/dist/frontend`.
+### Passo 3: Ativando a Inteligência Artificial
+Para que o "Assistente Gemma" e os "Relatórios com IA" funcionem corretamente:
+1. Siga as instruções da seção **Arquitetura de IA** acima para ligar o seu LM Studio.
+2. Rode o comando do Ngrok (`ngrok http 1234`).
+3. (Se o link mudar) Vá no arquivo `backend/main.py` e atualize a URL base da API da OpenAI com o link novo gerado pelo Ngrok.
 
 ---
 
