@@ -4,6 +4,55 @@ from pydantic import BaseModel
 from openai import OpenAI
 import os
 
+API_KEY = "ca8e74511637ad32870a4d271daa693c"
+BASE_URL = "https://api.openweathermap.org/data/2.5"
+
+
+def obter_clima_atual(cidade: str, uf: str) -> dict:
+    """
+    Retorna os dados do clima atual para uma cidade brasileira.
+
+    Parâmetros:
+        cidade (str): Nome da cidade.
+        uf (str): Sigla do estado (ex.: AC, SP, RJ).
+
+    Retorna:
+        dict: Resposta da API em formato JSON.
+    """
+    url = f"{BASE_URL}/weather"
+    params = {
+        "q": f"{cidade},{uf},BR",
+        "appid": API_KEY
+    }
+
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+
+    return response.json()
+
+
+def obter_previsao(cidade: str, uf: str) -> dict:
+    """
+    Retorna a previsão do tempo (5 dias, intervalos de 3 horas).
+
+    Parâmetros:
+        cidade (str): Nome da cidade.
+        uf (str): Sigla do estado (ex.: AC, SP, RJ).
+
+    Retorna:
+        dict: Resposta da API em formato JSON.
+    """
+    url = f"{BASE_URL}/forecast"
+    params = {
+        "q": f"{cidade},{uf},BR",
+        "appid": API_KEY
+    }
+
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+
+    return response.json()
+
 app = FastAPI(title="EcoGuys AI API", description="API para conectar com o modelo Gemma via Ngrok")
 
 # Configuração do CORS para permitir que o frontend acesse o backend
