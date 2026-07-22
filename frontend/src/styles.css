@@ -1,0 +1,170 @@
+/* ==========================================================================
+   EcoWatch AI – Design System & Glassmorphism Theme (Angular Core)
+   ========================================================================== */
+
+:root {
+  --primary: #2E7D32;
+  --primary-hover: #1B5E20;
+  --primary-light: rgba(46, 125, 50, 0.12);
+  
+  --secondary: #1565C0;
+  --secondary-hover: #0D47A1;
+  --secondary-light: rgba(21, 101, 192, 0.12);
+  
+  --accent: #FB8C00;
+  --accent-hover: #E65100;
+  --accent-light: rgba(251, 140, 0, 0.15);
+
+  --danger: #D32F2F;
+  --danger-light: rgba(211, 47, 47, 0.12);
+  
+  --warning: #F57C00;
+  --warning-light: rgba(245, 124, 0, 0.12);
+  
+  --success: #388E3C;
+  --success-light: rgba(56, 142, 60, 0.12);
+
+  --bg-main: #F5F7FA;
+  --glass-bg: rgba(255, 255, 255, 0.78);
+  --glass-bg-hover: rgba(255, 255, 255, 0.90);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-border-subtle: rgba(220, 226, 235, 0.8);
+  
+  --glass-blur: blur(16px);
+  --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
+  --shadow-hover: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+  --shadow-card: 0 4px 20px 0 rgba(0, 0, 0, 0.03);
+
+  --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  --text-main: #1C1C1C;
+  --text-sub: #666666;
+  --text-muted: #999999;
+
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 32px;
+
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+
+  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  background-image: 
+    radial-gradient(circle at 10% 10%, rgba(46, 125, 50, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(21, 101, 192, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(251, 140, 0, 0.03) 0%, transparent 50%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: var(--space-md);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-card);
+  transition: var(--transition-normal);
+}
+
+.glass-card:hover {
+  background: #FFFFFF;
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.btn {
+  font-family: var(--font-family);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: var(--transition-normal);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(46, 125, 50, 0.25);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 6px 20px rgba(46, 125, 50, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--secondary);
+  color: #FFFFFF;
+}
+
+.btn-glass {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--glass-border-subtle);
+  color: var(--text-main);
+}
+
+/* ===== Leaflet Custom Tooltip ===== */
+.map-tooltip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(220, 226, 235, 0.8) !important;
+  border-radius: 12px !important;
+  padding: 8px 14px !important;
+  font-family: var(--font-family) !important;
+  font-size: 0.82rem !important;
+  color: var(--text-main) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+}
+.map-tooltip::before {
+  border-top-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* ===== Leaflet Override ===== */
+.leaflet-container {
+  font-family: var(--font-family) !important;
+}
+
+/* ===== Utilities ===== */
+.mt-3 { margin-top: var(--space-sm); }
+.mt-4 { margin-top: var(--space-md); }
+.mb-3 { margin-bottom: var(--space-sm); }
+.mb-4 { margin-bottom: var(--space-md); }
+.w-100 { width: 100%; }
+.text-sub { color: var(--text-sub); }
+.text-center { text-align: center; }
+.py-3 { padding-top: var(--space-sm); padding-bottom: var(--space-sm); }
+.small { font-size: 0.82rem; }
+.panel-subtitle { font-size: 0.82rem; color: var(--text-sub); }
+.panel-header { display: flex; align-items: center; justify-content: space-between; }
