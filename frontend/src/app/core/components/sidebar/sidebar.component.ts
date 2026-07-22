@@ -42,14 +42,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           <i data-lucide="file-bar-chart"></i>
           <span>Relatórios</span>
         </a>
-        <a routerLink="/alertas" (click)="closeMobileOnNav()" routerLinkActive="active" class="nav-item">
-          <i data-lucide="bell"></i>
-          <span>Alertas</span>
-          <span class="badge-alert-count">0</span>
-        </a>
         <a routerLink="/configuracoes" (click)="closeMobileOnNav()" routerLinkActive="active" class="nav-item">
-          <i data-lucide="settings"></i>
-          <span>Configurações</span>
+          <i data-lucide="info"></i>
+          <span>Informações</span>
         </a>
       </nav>
 
