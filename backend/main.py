@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai import OpenAI
 import os
+import requests
 
 API_KEY = "ca8e74511637ad32870a4d271daa693c"
 BASE_URL = "https://api.openweathermap.org/data/2.5"
