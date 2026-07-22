@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoWatch AI – Plataforma de Monitoramento Ambiental com IA</title>
+  <!-- Google Fonts: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Leaflet Map CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- ==================== SIDEBAR FIXA ==================== -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-box">
+          <div class="logo-icon">
+            <i data-lucide="shield-check"></i>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">EcoWatch AI</span>
+            <span class="logo-tag">MONITORAMENTO AMBIENTAL</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-page="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard Ambiental</span>
+        </button>
+        <button class="nav-item" data-page="mapa">
+          <i data-lucide="map-pin"></i>
+          <span>Mapa Interativo</span>
+        </button>
+        <button class="nav-item" data-page="assistente">
+          <i data-lucide="bot"></i>
+          <span>Assistente Gemma</span>
+          <span class="badge-sparkle">IA</span>
+        </button>
+        <button class="nav-item" data-page="relatorios">
+          <i data-lucide="file-bar-chart"></i>
+          <span>Relatórios Automáticos</span>
+        </button>
+        <button class="nav-item" data-page="alertas">
+          <i data-lucide="bell"></i>
+          <span>Sistema de Alertas</span>
+          <span class="badge-alert-count" id="sidebarAlertBadge">0</span>
+        </button>
+        <button class="nav-item" data-page="configuracoes">
+          <i data-lucide="settings"></i>
+          <span>Configurações & APIs</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="ai-status-card">
+          <div class="ai-status-indicator">
+            <span class="pulse-dot"></span>
+            <span>Gemma AI: Pronto</span>
+          </div>
+          <p class="ai-status-desc">Interpretação e Relatórios Automáticos</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ==================== MAIN CONTENT AREA ==================== -->
+    <div class="main-wrapper">
+      
+      <!-- ==================== HEADER FIXO ==================== -->
+      <header class="header">
+        <div class="header-left">
+          <div class="search-box">
+            <i data-lucide="search"></i>
+            <input type="text" id="searchInput" placeholder="Buscar município ou estação de monitoramento...">
+          </div>
+          <div class="location-selector">
+            <i data-lucide="map-pin"></i>
+            <select id="locationSelect">
+              <option value="" disabled selected>Selecione um município...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <button class="btn btn-secondary btn-sm" id="btnRefresh">
+            <i data-lucide="refresh-cw"></i>
+            <span>Sincronizar APIs</span>
+          </button>
+
+          <button class="btn-icon-badge" id="btnHeaderAlerts" title="Alertas do Sistema">
+            <i data-lucide="bell"></i>
+            <span class="notification-badge" id="headerAlertBadge">0</span>
+          </button>
+
+          <div class="user-profile">
+            <div class="avatar-placeholder">
+              <i data-lucide="user"></i>
+            </div>
+            <div class="user-info">
+              <span class="user-name">Gestor / Cidadão</span>
+              <span class="user-role">Acesso Público</span>
+            </div>
+            <i data-lucide="chevron-down"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- ==================== VIEWPORT PÁGINAS ==================== -->
+      <main class="content-body">
+
+        <!-- ==================== TELA 1: DASHBOARD AMBIENTAL ==================== -->
+        <section id="page-dashboard" class="page-view active">
+          <div class="dashboard-grid">
+            
+            <!-- Hero Card Gemma AI: Interpretação dos Dados Ambientais -->
+            <div class="hero-gemma-card glass-panel">
+              <div class="gemma-avatar-box">
+                <div class="gemma-glow"></div>
+                <div class="gemma-avatar">
+                  <i data-lucide="sparkles"></i>
+                </div>
+              </div>
+              <div class="gemma-content">
+                <div class="gemma-badge">
+                  <i data-lucide="zap"></i> INTERPRETAÇÃO DE DADOS PELO GEMMA AI
+                </div>
+                <h2 class="gemma-title" id="dashGemmaTitle">Análise Ambiental Simplificada</h2>
+                <p class="gemma-text" id="dashGemmaText">
+                  <em>[Aguardando dados das APIs públicas (INMET, INPE, OpenWeather) para geração de análise simplificada pelo Gemma AI...]</em>
+                </p>
+                <div class="gemma-actions">
+                  <button class="btn btn-primary" onclick="navigateTo('assistente')">
+                    <i data-lucide="message-square"></i> Perguntar ao Assistente Gemma
+                  </button>
+                  <button class="btn btn-glass" onclick="navigateTo('relatorios')">
+                    <i data-lucide="file-text"></i> Emitir Relatório Automático (PDF)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Grade com TODOS os 9 Indicadores Ambiental exigidos no concept.md -->
+            <div class="metrics-grid-9">
+              
+              <!-- 1. Temperatura -->
+              <div class="metric-card glass-card">
+                <div class="metric-header">
+                  <span class="metric-label">Temperatura</span>
+                  <div class="metric-icon-box temp"><i data-lucide="thermometer"></i></div>
+                </div>
+                <div class="metric-value-group">
+                  <span class="metric-value" id="valTemp">-- °C</span>
+                </div>
+              </div>
+
+              <!-- 2. Umidade -->
+              <div class="metric-card glass-card">
+                <div class="metric-header">
+                  <span class="metric-label">Umidade Relativa</span>
+                  <div class="metric-icon-box humidity"><i data-lucide="droplets"></i></div>
+                </div>
+                <div class="metric-value-group">
+                  <span class="metric-value" id="valHumidity">-- %</span>
+                </div>
+              </div>
+
+              <!-- 3. Precipitação -->
+              <div class="metric-card glass-card">
+                <div class="metric-header">
+                  <span class="metric-label">Precipitação</span>
+                  <div class="metric-icon-box rain"><i data-lucide="cloud-rain"></i></div>
+                </div>
+                <div class="metric-value-group">
+                  <span class="metric-value" id="valRain">-- mm</span>
+                </div>
+              </div>
+
+              <!-- 4. Velocidade do Vento -->
+              <div class="metric-card glass-card">
+                <div class="metric-header">
+                  <span class="metric-label">Velocidade do Vento</span>
+                  <div class="metric-icon-box wind"><i data-lucide="wind"></i></div>
+                </div>
+                <div class="metric-value-group">
+                  <span class="metric-value" id="valWind">-- km/h</span>
+                </div>
+              </div>
+
+              <!-- 5. Qualidade do Ar -->
+              <div class="metric-card glass-card">
+                <div class="metric-header">
+                  <span class="metric-label">Qualidade do Ar</span>
+                  <div class="metric-icon-box aqi"><i data-lucide="activity"></i></div>
+                </div>
+                <div class="metric-value-group">
+                  <span class="metric-value" id="valAQI">-- AQI</span>
+                </div>
+              </div>
+
+              <!-- 6. Índice UV -->
+              <div class="metric-card glass-card">
+                <div class="metric-header">
+                  <span class="metric-label">Índice UV</span>
+                  <div class="metric-icon-box uv"><i data-lucide="sun"></i></div>
+                </div>
+                <div class="metric-value-group">
+                  <span class="metric-value" id="valUV">--</span>
+                </div>
+              </div>
+
+              <!-- 7. Nível de Rios -->
+              <div class="metric-card glass-card">
+                <div class="metric-header">
+                  <span class="metric-label">Nível de Rios</span>
+                  <div class="metric-icon-box river"><i data-lucide="waves"></i></div>
+                </div>
+                <div class="metric-value-group">
+                  <span class="metric-value" id="valRiver">-- m</span>
+                </div>
+              </div>
+
+              <!-- 8. Focos de Queimadas -->
+              <div class="metric-card glass-card">
+                <div class="metric-header">
+                  <span class="metric-label">Focos de Queimadas</span>
+                  <div class="metric-icon-box fire"><i data-lucide="flame"></i></div>
+                </div>
+                <div class="metric-value-group">
+                  <span class="metric-value" id="valFires">-- focos</span>
+                </div>
+              </div>
+
+              <!-- 9. Cobertura Vegetal -->
+              <div class="metric-card glass-card">
+                <div class="metric-header">
+                  <span class="metric-label">Cobertura Vegetal</span>
+                  <div class="metric-icon-box forest"><i data-lucide="trees"></i></div>
+                </div>
+                <div class="metric-value-group">
+                  <span class="metric-value" id="valForest">-- %</span>
+                </div>
+              </div>
+
+            </div> <!-- /metrics-grid-9 -->
+
+            <!-- Evolução de Indicadores & Recomendações Gemma AI -->
+            <div class="dashboard-middle-row">
+              <div class="chart-panel glass-panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Evolução dos Indicadores Ambientais</h3>
+                    <p class="panel-subtitle">Histórico de leituras das APIs oficiais</p>
+                  </div>
+                  <div class="tab-group">
+                    <button class="tab-item active">Últimos 7 Dias</button>
+                    <button class="tab-item">Último Mês</button>
+                    <button class="tab-item">Últimos 12 Meses</button>
+                  </div>
+                </div>
+                <div class="chart-box">
+                  <canvas id="dashboard24hChart"></canvas>
+                </div>
+              </div>
+
+              <div class="insights-panel glass-panel">
+                <div class="panel-header">
+                  <h3><i data-lucide="lightbulb" class="text-accent"></i> Recomendações do Gemma</h3>
+                </div>
+                <div class="insights-list" id="insightsList">
+                  <div class="empty-state-box">
+                    <i data-lucide="info"></i>
+                    <p>Aguardando integração das APIs para geração de recomendações preventivas.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ==================== TELA 2: VISUALIZAÇÃO GEOGRÁFICA (MAPA INTERATIVO) ==================== -->
+        <section id="page-mapa" class="page-view">
+          <div class="map-view-container">
+            
+            <div class="map-filter-bar glass-panel">
+              <div class="filter-title">
+                <i data-lucide="layers"></i>
+                <span>Visualização Geográfica (Camadas):</span>
+              </div>
+              <div class="filter-checkboxes">
+                <label class="checkbox-chip active">
+                  <input type="checkbox" checked id="layerPontos">
+                  <span class="chip-dot primary"></span>
+                  <span>Pontos Monitorados</span>
+                </label>
+                <label class="checkbox-chip active">
+                  <input type="checkbox" checked id="layerIndicadores">
+                  <span class="chip-dot secondary"></span>
+                  <span>Indicadores Ambientais</span>
+                </label>
+                <label class="checkbox-chip active">
+                  <input type="checkbox" checked id="layerAlertas">
+                  <span class="chip-dot danger"></span>
+                  <span>Alertas Ativos</span>
+                </label>
+                <label class="checkbox-chip active">
+                  <input type="checkbox" checked id="layerRisco">
+                  <span class="chip-dot accent"></span>
+                  <span>Regiões com Maior Risco</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="map-layout-body">
+              <div id="interactiveMap" class="leaflet-map-frame glass-panel"></div>
+
+              <!-- Drawer do Ponto Clicado -->
+              <div id="mapDrawer" class="map-drawer glass-panel">
+                <button class="btn-close-drawer" id="btnCloseDrawer"><i data-lucide="x"></i></button>
+                <div class="drawer-header">
+                  <span class="badge-drawer info" id="drawerBadge">---</span>
+                  <h3 id="drawerTitle">Selecione um Ponto Monitorado</h3>
+                  <p id="drawerSubtitle" class="text-sub">Clique em um ponto no mapa para exibir dados e alertas</p>
+                </div>
+                <div class="drawer-body">
+                  <div class="drawer-stat-grid">
+                    <div class="stat-box">
+                      <span class="stat-lbl">Temperatura</span>
+                      <span class="stat-val" id="drawerTemp">--</span>
+                    </div>
+                    <div class="stat-box">
+                      <span class="stat-lbl">Umidade</span>
+                      <span class="stat-val" id="drawerHumidity">--</span>
+                    </div>
+                    <div class="stat-box">
+                      <span class="stat-lbl">Qualidade do Ar</span>
+                      <span class="stat-val" id="drawerAqi">--</span>
+                    </div>
+                    <div class="stat-box">
+                      <span class="stat-lbl">Índice UV</span>
+                      <span class="stat-val" id="drawerUv">--</span>
+                    </div>
+                  </div>
+
+                  <div class="gemma-drawer-insight">
+                    <div class="gemma-mini-head">
+                      <i data-lucide="sparkles"></i> <strong>Interpretação da IA para este Ponto</strong>
+                    </div>
+                    <p id="drawerInsight">
+                      <em>[Selecione um ponto no mapa para carregar a interpretação do Gemma AI]</em>
+                    </p>
+                  </div>
+
+                  <div class="drawer-actions">
+                    <button class="btn btn-primary w-100" onclick="navigateTo('assistente')">
+                      <i data-lucide="message-square"></i> Consultar Gemma sobre este Ponto
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ==================== TELA 3: ASSISTENTE INTELIGENTE (GEMMA) ==================== -->
+        <section id="page-assistente" class="page-view">
+          <div class="chat-container glass-panel">
+            
+            <div class="chat-sidebar">
+              <button class="btn btn-primary w-100 mb-3" id="btnNewChat">
+                <i data-lucide="plus"></i> Nova Consulta
+              </button>
+              <div class="chat-history-title">CONSULTAS ANTERIORES</div>
+              <div class="chat-history-list" id="chatHistoryList">
+                <div class="empty-state-small">
+                  <span>Nenhum histórico armazenado</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-main">
+              <div class="chat-header">
+                <div class="chat-gemma-info">
+                  <div class="avatar-gemma-small">
+                    <i data-lucide="sparkles"></i>
+                  </div>
+                  <div>
+                    <h4>Assistente Inteligente (Gemma AI)</h4>
+                    <span class="text-sub small">Consultas em linguagem natural sobre indicadores ambientais</span>
+                  </div>
+                </div>
+                <button class="btn btn-glass btn-sm" id="btnClearChat"><i data-lucide="trash-2"></i> Limpar Chat</button>
+              </div>
+
+              <!-- Message Stream -->
+              <div class="chat-stream" id="chatStream">
+                <div class="chat-msg gemma">
+                  <div class="msg-avatar"><i data-lucide="sparkles"></i></div>
+                  <div class="msg-bubble">
+                    <p>Olá! Sou o **Gemma AI**, o assistente de monitoramento ambiental do **EcoWatch AI**.</p>
+                    <p>Você pode me fazer perguntas em linguagem natural como nos exemplos abaixo:</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Prompts Exatos do concept.md -->
+              <div class="quick-prompts-bar">
+                <span class="quick-title">Exemplos do concept.md:</span>
+                <button class="prompt-chip" onclick="sendQuickPrompt('Como está a qualidade do ar hoje?')">
+                  "Como está a qualidade do ar hoje?"
+                </button>
+                <button class="prompt-chip" onclick="sendQuickPrompt('Existe risco de queimadas nesta região?')">
+                  "Existe risco de queimadas nesta região?"
+                </button>
+                <button class="prompt-chip" onclick="sendQuickPrompt('O que significa um índice UV alto?')">
+                  "O que significa um índice UV alto?"
+                </button>
+                <button class="prompt-chip" onclick="sendQuickPrompt('Faça um resumo ambiental desta semana.')">
+                  "Faça um resumo ambiental desta semana."
+                </button>
+              </div>
+
+              <div class="chat-input-box">
+                <input type="text" id="chatInput" placeholder="Faça uma pergunta sobre o meio ambiente em linguagem natural...">
+                <button class="btn btn-primary btn-icon" id="btnSendChat">
+                  <i data-lucide="send"></i>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ==================== TELA 4: RELATÓRIOS AUTOMÁTICOS ==================== -->
+        <section id="page-relatorios" class="page-view">
+          <div class="reports-container">
+            
+            <div class="reports-filter-bar glass-panel">
+              <div class="filter-group">
+                <label>Município/Região:</label>
+                <select class="form-select" id="reportCitySelect">
+                  <option value="">Selecione...</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Histórico (Período):</label>
+                <select class="form-select">
+                  <option value="7d">Últimos 7 dias</option>
+                  <option value="30d">Último mês</option>
+                  <option value="12m">Últimos 12 meses</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" id="btnOpenReportModal">
+                <i data-lucide="sparkles"></i> Gerar Relatório Automático (Gemma)
+              </button>
+            </div>
+
+            <!-- Estrutura do Relatório Automático conforme concept.md -->
+            <div class="report-sections-preview glass-panel">
+              <h3><i data-lucide="file-text"></i> Estrutura do Relatório Gerado pelo Gemma AI</h3>
+              <div class="report-structure-grid">
+                <div class="struct-card glass-card">
+                  <span class="struct-num">1</span>
+                  <h4>Resumo das Condições Ambientais</h4>
+                  <p class="text-sub small">Síntese simples de todos os indicadores coletados pelas APIs.</p>
+                </div>
+                <div class="struct-card glass-card">
+                  <span class="struct-num">2</span>
+                  <h4>Principais Alterações Observadas</h4>
+                  <p class="text-sub small">Identificação de anomalias térmicas, queda de umidade ou picos de radiação.</p>
+                </div>
+                <div class="struct-card glass-card">
+                  <span class="struct-num">3</span>
+                  <h4>Possíveis Riscos</h4>
+                  <p class="text-sub small">Mapeamento de risco de queimadas, secas ou tempestades.</p>
+                </div>
+                <div class="struct-card glass-card">
+                  <span class="struct-num">4</span>
+                  <h4>Recomendações Preventivas</h4>
+                  <p class="text-sub small">Orientações claras para a população, escolas e defesa civil.</p>
+                </div>
+                <div class="struct-card glass-card">
+                  <span class="struct-num">5</span>
+                  <h4>Tendências Identificadas</h4>
+                  <p class="text-sub small">Projeção da evolução dos indicadores para os próximos dias.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Histórico de PDFs Exportados -->
+            <div class="history-table-card glass-panel mt-4">
+              <div class="panel-header">
+                <h3><i data-lucide="file-check"></i> Histórico de Relatórios Exportados em PDF</h3>
+              </div>
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Título do Relatório</th>
+                    <th>Data de Geração</th>
+                    <th>Período Analisado</th>
+                    <th>Exportação</th>
+                  </tr>
+                </thead>
+                <tbody id="reportsTableBody">
+                  <tr>
+                    <td colspan="4" class="text-center text-sub py-3">
+                      <em>Nenhum relatório PDF exportado no momento. Use o botão acima para gerar um relatório automático.</em>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ==================== TELA 5: SISTEMA DE ALERTAS ==================== -->
+        <section id="page-alertas" class="page-view">
+          <div class="alerts-layout">
+            
+            <div class="alerts-main-list glass-panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Sistema de Alertas Ambientais</h3>
+                  <p class="panel-subtitle">Notificações emitidas quando limites forem ultrapassados</p>
+                </div>
+              </div>
+
+              <!-- Exemplos de Alertas do concept.md -->
+              <div class="alert-triggers-info">
+                <h4>Gatilhos de Notificação Definidos no concept.md:</h4>
+                <div class="triggers-chips">
+                  <span class="trigger-chip"><i data-lucide="thermometer"></i> Temperatura Muito Elevada</span>
+                  <span class="trigger-chip"><i data-lucide="droplets"></i> Baixa Umidade</span>
+                  <span class="trigger-chip"><i data-lucide="wind"></i> Piora da Qualidade do Ar</span>
+                  <span class="trigger-chip"><i data-lucide="flame"></i> Aumento do Risco de Queimadas</span>
+                  <span class="trigger-chip"><i data-lucide="cloud-rain"></i> Chuvas Intensas</span>
+                </div>
+              </div>
+
+              <div class="alerts-feed" id="alertsFeed">
+                <div class="empty-state-box">
+                  <i data-lucide="bell-off"></i>
+                  <p>Nenhum alerta ativo no momento. Notificações serão emitidas automaticamente via API.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Configuração de Limites do Sistema -->
+            <div class="alerts-settings-panel glass-panel">
+              <div class="panel-header">
+                <h3><i data-lucide="sliders"></i> Parâmetros dos Alertas</h3>
+              </div>
+              <div class="settings-form">
+                
+                <div class="setting-item">
+                  <label>Limite para Alerta de Temperatura (°C)</label>
+                  <input type="number" class="form-input" placeholder="Ex: 35">
+                </div>
+
+                <div class="setting-item">
+                  <label>Limite para Alerta de Umidade Mínima (%)</label>
+                  <input type="number" class="form-input" placeholder="Ex: 30">
+                </div>
+
+                <div class="setting-item">
+                  <label>Limite para Alerta de Qualidade do Ar (AQI)</label>
+                  <input type="number" class="form-input" placeholder="Ex: 100">
+                </div>
+
+                <button class="btn btn-primary w-100 mt-3" onclick="showNotification('Parâmetros salvos!')">
+                  <i data-lucide="save"></i> Salvar Limites
+                </button>
+
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ==================== TELA 6: CONFIGURAÇÕES & APIS ==================== -->
+        <section id="page-configuracoes" class="page-view">
+          <div class="config-container glass-panel">
+            <div class="panel-header">
+              <h3><i data-lucide="settings"></i> APIs Públicas Especificadas no concept.md</h3>
+            </div>
+            <div class="config-body">
+              <p>O <strong>EcoWatch AI</strong> consome dados das seguintes fontes oficiais:</p>
+              <div class="config-sections-grid">
+                <div class="config-card glass-card">
+                  <h4>OpenWeatherMap & INMET</h4>
+                  <p class="small text-sub">Dados meteorológicos: Temperatura, Umidade, Vento e Chuva</p>
+                </div>
+                <div class="config-card glass-card">
+                  <h4>CPTEC / INPE</h4>
+                  <p class="small text-sub">Monitoramento de focos de queimadas e dados de satélite</p>
+                </div>
+                <div class="config-card glass-card">
+                  <h4>MapBiomas & IBGE</h4>
+                  <p class="small text-sub">Cobertura vegetal e recortes territoriais de municípios</p>
+                </div>
+                <div class="config-card glass-card">
+                  <h4>Gemma AI (Modelo de Linguagem)</h4>
+                  <p class="small text-sub">Interpretação técnica, geração de relatórios e chatbot</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+
+  <!-- ==================== MODAL DE RELATÓRIO AUTOMÁTICO ==================== -->
+  <div id="reportModal" class="modal-overlay">
+    <div class="modal-card glass-panel">
+      <div class="modal-head">
+        <div class="modal-icon-sparkle">
+          <i data-lucide="sparkles"></i>
+        </div>
+        <div>
+          <h3>Gerar Relatório Automático em PDF</h3>
+          <p class="modal-sub">Geração baseada na interpretação dos dados pelo Gemma AI</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseReportModal"><i data-lucide="x"></i></button>
+      </div>
+
+      <div class="modal-body">
+        <p class="small text-sub">O relatório conterá o resumo ambiental, alterações observadas, riscos, recomendações e tendências.</p>
+        <div class="form-group">
+          <label>Município Alvo:</label>
+          <input type="text" class="form-input" placeholder="Digite o município...">
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn btn-glass" id="btnCancelReportModal">Cancelar</button>
+        <button class="btn btn-primary" id="btnConfirmGenerateReport">
+          <i data-lucide="file-check"></i> Exportar PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Toast Notification Box -->
+  <div id="toastNotification" class="toast-box">
+    <i data-lucide="check-circle-2"></i>
+    <span id="toastMessage">Operação realizada</span>
+  </div>
+
+  <!-- Custom App Script -->
+  <script src="app.js"></script>
+</body>
+</html>
