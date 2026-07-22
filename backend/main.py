@@ -23,7 +23,8 @@ def obter_clima_atual(cidade: str, uf: str) -> dict:
     url = f"{BASE_URL}/weather"
     params = {
         "q": f"{cidade},{uf},BR",
-        "appid": API_KEY
+        "appid": API_KEY,
+        "units": "metric"
     }
 
     response = requests.get(url, params=params)
@@ -46,7 +47,8 @@ def obter_previsao(cidade: str, uf: str) -> dict:
     url = f"{BASE_URL}/forecast"
     params = {
         "q": f"{cidade},{uf},BR",
-        "appid": API_KEY
+        "appid": API_KEY,
+        "units": "metric"
     }
 
     response = requests.get(url, params=params)
@@ -99,12 +101,21 @@ async def chat_with_ai(request: ChatRequest):
                     previsao["list"] = previsao["list"][:3]
                 
                 regras_analise = (
-                    "\n\nDIRETRIZES DE ANÁLISE E CÁLCULO DE RISCO AMBIENTAL:\n"
-                    "1. Risco de Queimadas (Fórmula de Angstrom adaptada): Se a umidade for < 30% e a temperatura > 30°C (ou > 303K), alerte para ALTO RISCO de queimadas. Ventos rápidos (wind speed > 5 m/s) agravam isso para RISCO CRÍTICO.\n"
-                    "2. Saúde e Ar: Umidade < 20% = Estado de Emergência (risco respiratório grave). Umidade < 30% = Estado de Atenção.\n"
-                    "3. Conforto Térmico: Temperatura alta associada a alta umidade (>70%) aumenta o risco de exaustão térmica (sensação térmica elevada).\n"
-                    "4. Tempestades: Observe o campo 'pop' (probabilidade de precipitação) e ventos na previsão. Ventos muito fortes podem indicar tempestade iminente.\n"
-                    "Use essas regras matemáticas em sua mente para 'prever' e deduzir a situação quando o usuário perguntar. Converta a temperatura (se estiver em Kelvin) para Celsius (C = K - 273.15) antes de entregar ao usuário.\n"
+                    "\n\nDIRETRIZES RIGOROSAS DE ANÁLISE AMBIENTAL:\n"
+                    "Regra de Ouro: NUNCA invente riscos que não existem. Se as condições forem normais, afirme claramente que o risco é BAIXO ou a situação é SEGURA.\n\n"
+                    "1. Risco de Queimadas:\n"
+                    "   - BAIXO/NENHUM: Se a umidade for > 30% ou a temperatura for < 30°C.\n"
+                    "   - ALTO RISCO: APENAS SE (Umidade < 30% E Temperatura > 30°C).\n"
+                    "   - RISCO CRÍTICO: APENAS SE (Cenário de Alto Risco E Vento > 5 m/s).\n"
+                    "2. Saúde e Qualidade do Ar:\n"
+                    "   - NORMAL: Umidade > 30%.\n"
+                    "   - ATENÇÃO: Umidade entre 20% e 30%.\n"
+                    "   - EMERGÊNCIA: Umidade < 20% (risco respiratório grave).\n"
+                    "3. Conforto Térmico:\n"
+                    "   - NORMAL: Sem calor extremo ou umidade extrema combinados.\n"
+                    "   - EXAUSTÃO TÉRMICA: Temperatura > 30°C combinada com Umidade > 70%.\n"
+                    "4. Tempestades: Observe a probabilidade de chuva ('pop') e ventos na previsão. Ventos fortes podem indicar tempestades iminentes.\n\n"
+                    "Baseie sua resposta EXCLUSIVAMENTE nos dados exatos fornecidos abaixo. A temperatura já está convertida para Celsius (°C).\n"
                 )
 
                 context_prompt += regras_analise + (
