@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
   template: `
     <div class="config-container glass-panel">
       <div class="panel-header mb-3">
-        <h3><i data-lucide="settings"></i> Configurações</h3>
+        <h3><i data-lucide="info"></i> Informações do Sistema</h3>
       </div>
       <div class="config-body">
         <p class="text-sub mb-4">Fontes de dados integradas ao <strong>EcoWatch AI</strong>:</p>

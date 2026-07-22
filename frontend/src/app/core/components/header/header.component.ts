@@ -1,11 +1,25 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { catchError, of } from 'rxjs';
 import { EnvironmentService } from '../../services/environment.service';
+
+interface StateIBGE {
+  id: number;
+  sigla: string;
+  nome: string;
+}
+
+interface CityIBGE {
+  id: number;
+  nome: string;
+}
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <header class="header">
       <div class="header-left">
@@ -14,43 +28,37 @@ import { EnvironmentService } from '../../services/environment.service';
           <i data-lucide="menu"></i>
         </button>
 
-        <div class="search-box">
-          <i data-lucide="search"></i>
-          <input type="text" placeholder="Buscar município...">
-        </div>
-        
-        <div class="location-selector">
-          <i data-lucide="map-pin"></i>
-          <select [value]="envService.selectedCity()" (change)="onCityChange($event)">
-            <option value="Rio Branco - AC">Rio Branco - AC</option>
-            <option value="Manaus - AM">Manaus - AM</option>
-            <option value="Cuiabá - MT">Cuiabá - MT</option>
-            <option value="Belém - PA">Belém - PA</option>
-            <option value="Porto Velho - RO">Porto Velho - RO</option>
-          </select>
+        <!-- Seletor Encadeado de Estado e Município no Topo -->
+        <div class="header-location-group">
+          
+          <div class="location-selector state-select">
+            <i data-lucide="map"></i>
+            <select [(ngModel)]="selectedStateSigla" (change)="onStateChange()" [disabled]="loadingStates">
+              <option *ngIf="loadingStates" value="">Carregando...</option>
+              <option *ngFor="let st of statesList" [value]="st.sigla">
+                {{ st.sigla }} - {{ st.nome }}
+              </option>
+            </select>
+          </div>
+
+          <div class="location-selector city-select">
+            <i data-lucide="map-pin"></i>
+            <select [(ngModel)]="selectedCityName" (change)="onCityChange()" [disabled]="loadingCities">
+              <option *ngIf="loadingCities" value="">Carregando...</option>
+              <option *ngFor="let city of availableCities" [value]="city.nome">
+                {{ city.nome }}
+              </option>
+            </select>
+          </div>
+
         </div>
       </div>
 
       <div class="header-right">
-        <button (click)="refreshData()" class="btn btn-secondary btn-sm" title="Carregar / Atualizar dados de demonstração">
+        <button (click)="refreshData()" class="btn btn-secondary btn-sm" title="Carregar / Atualizar dados">
           <i data-lucide="refresh-cw"></i>
           <span class="hide-mobile">Atualizar Dados</span>
         </button>
-
-        <button class="btn-icon-badge" title="Alertas Ativos">
-          <i data-lucide="bell"></i>
-          <span *ngIf="envService.alerts().length > 0" class="notification-badge">{{ envService.alerts().length }}</span>
-        </button>
-
-        <div class="user-profile">
-          <div class="avatar-placeholder">
-            <i data-lucide="user"></i>
-          </div>
-          <div class="user-info hide-mobile">
-            <span class="user-name">Usuário</span>
-          </div>
-          <i data-lucide="chevron-down" class="hide-mobile"></i>
-        </div>
       </div>
     </header>
   `,
@@ -60,7 +68,7 @@ import { EnvironmentService } from '../../services/environment.service';
       position: sticky;
       top: 0;
       z-index: 90;
-      background: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(46, 125, 50, 0.15);
       border-radius: 20px;
@@ -85,32 +93,34 @@ import { EnvironmentService } from '../../services/environment.service';
       color: #2E7D32;
     }
 
-    .search-box {
-      display: flex; align-items: center; gap: 8px;
-      background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(220, 226, 235, 0.8);
-      border-radius: 16px; padding: 8px 16px; width: 260px;
+    .header-location-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .search-box input { border: none; outline: none; background: transparent; width: 100%; font-size: 0.85rem; }
+
     .location-selector {
-      display: flex; align-items: center; gap: 6px;
-      background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(46, 125, 50, 0.2);
-      border-radius: 16px; padding: 8px 12px; color: #2E7D32;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1.5px solid rgba(46, 125, 50, 0.22);
+      border-radius: 16px;
+      padding: 8px 14px;
+      color: #2E7D32;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
     }
-    .location-selector select { border: none; outline: none; background: transparent; font-weight: 600; font-size: 0.85rem; cursor: pointer; color: #2E7D32; }
-    .btn-icon-badge {
-      position: relative; width: 40px; height: 40px; border-radius: 16px;
-      background: #FFF; border: 1px solid rgba(220, 226, 235, 0.8);
-      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    .location-selector select {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      color: #1C1C1C;
+      font-family: inherit;
     }
-    .notification-badge {
-      position: absolute; top: -4px; right: -4px; background: #D32F2F; color: #FFF;
-      font-size: 0.68rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; border: 2px solid #FFF;
-    }
-    .user-profile { display: flex; align-items: center; gap: 10px; padding: 4px 8px; cursor: pointer; }
-    .avatar-placeholder { width: 38px; height: 38px; border-radius: 50%; background: rgba(46, 125, 50, 0.12); color: #2E7D32; display: flex; align-items: center; justify-content: center; }
-    .user-info { display: flex; flex-direction: column; }
-    .user-name { font-size: 0.88rem; font-weight: 600; }
+    .location-selector select:disabled { opacity: 0.6; cursor: wait; }
 
     /* ===== Media Queries Responsivos ===== */
     @media (max-width: 1024px) {
@@ -119,7 +129,9 @@ import { EnvironmentService } from '../../services/environment.service';
     }
 
     @media (max-width: 768px) {
-      .search-box { display: none; }
+      .header-location-group { flex-direction: column; gap: 6px; align-items: flex-start; }
+      .location-selector { padding: 4px 8px; }
+      .location-selector select { font-size: 0.78rem; }
       .hide-mobile { display: none !important; }
       .header-left, .header-right { gap: 8px; }
     }
@@ -127,9 +139,82 @@ import { EnvironmentService } from '../../services/environment.service';
 })
 export class HeaderComponent implements OnInit {
   envService = inject(EnvironmentService);
+  private http = inject(HttpClient);
+  private ibgeUrl = 'https://servicodados.ibge.gov.br/api/v1/localidades';
+
+  statesList: StateIBGE[] = [];
+  availableCities: CityIBGE[] = [];
+
+  selectedStateSigla = 'AC';
+  selectedCityName = 'Rio Branco';
+
+  loadingStates = true;
+  loadingCities = false;
 
   ngOnInit(): void {
-    // A inicialização dos dados ocorre automaticamente no construtor do EnvironmentService
+    this.fetchStates();
+  }
+
+  fetchStates(): void {
+    this.loadingStates = true;
+    this.http.get<StateIBGE[]>(`${this.ibgeUrl}/estados?orderBy=nome`)
+      .pipe(
+        catchError(() => {
+          return of([
+            { id: 12, sigla: 'AC', nome: 'Acre' },
+            { id: 13, sigla: 'AM', nome: 'Amazonas' },
+            { id: 51, sigla: 'MT', nome: 'Mato Grosso' },
+            { id: 15, sigla: 'PA', nome: 'Pará' },
+            { id: 11, sigla: 'RO', nome: 'Rondônia' },
+            { id: 35, sigla: 'SP', nome: 'São Paulo' },
+            { id: 33, sigla: 'RJ', nome: 'Rio de Janeiro' }
+          ]);
+        })
+      )
+      .subscribe(states => {
+        this.statesList = states;
+        this.loadingStates = false;
+        if (states.length > 0) {
+          this.selectedStateSigla = 'AC';
+          this.fetchCities('AC');
+        }
+      });
+  }
+
+  onStateChange(): void {
+    if (this.selectedStateSigla) {
+      this.fetchCities(this.selectedStateSigla);
+    }
+  }
+
+  fetchCities(uf: string): void {
+    this.loadingCities = true;
+    this.http.get<CityIBGE[]>(`${this.ibgeUrl}/estados/${uf}/municipios?orderBy=nome`)
+      .pipe(
+        catchError(() => {
+          return of([
+            { id: 1, nome: 'Rio Branco' },
+            { id: 2, nome: 'Cruzeiro do Sul' }
+          ]);
+        })
+      )
+      .subscribe(cities => {
+        this.availableCities = cities;
+        this.loadingCities = false;
+        if (cities.length > 0) {
+          this.selectedCityName = cities[0].nome;
+          this.notifyEnvironmentService();
+        }
+      });
+  }
+
+  onCityChange(): void {
+    this.notifyEnvironmentService();
+  }
+
+  notifyEnvironmentService(): void {
+    const fullCityString = `${this.selectedCityName} - ${this.selectedStateSigla}`;
+    this.envService.updateCity(fullCityString);
   }
 
   toggleMobileSidebar(): void {
@@ -143,12 +228,7 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  onCityChange(event: Event): void {
-    const val = (event.target as HTMLSelectElement).value;
-    this.envService.updateCity(val);
-  }
-
   refreshData(): void {
-    this.envService.fetchData(this.envService.selectedCity());
+    this.notifyEnvironmentService();
   }
 }

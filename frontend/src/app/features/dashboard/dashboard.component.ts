@@ -47,20 +47,11 @@ declare const Chart: any;
           <div class="shimmer-chart-box shimmer"></div>
         </div>
       </div>
-
-      <aside class="dashboard-right-column">
-        <div class="alerts-large-card glass-panel shimmer-container">
-          <div class="shimmer-sidebar-header shimmer"></div>
-          <div class="shimmer-sidebar-box shimmer mt-3"></div>
-          <div class="shimmer-sidebar-box shimmer mt-3"></div>
-        </div>
-      </aside>
     </div>
 
     <!-- DASHBOARD REAL (Carregado com Sucesso) -->
     <div *ngIf="!isLoading" class="dashboard-grid-layout">
 
-      <!-- ================= PARTE 2: CENTRO DA TELA ================= -->
       <div class="dashboard-center-column">
 
         <!-- Hero Card Gemma AI -->
@@ -109,7 +100,7 @@ declare const Chart: any;
           </div>
         </div>
 
-        <!-- Evolução dos Indicadores (Gráfico de Barras + Curva Suave - Estilo Referência) -->
+        <!-- Evolução dos Indicadores (Gráfico de Barras + Curva Suave) -->
         <div class="chart-panel glass-panel mt-4">
           <div class="panel-header mb-3">
             <div>
@@ -122,130 +113,18 @@ declare const Chart: any;
           </div>
         </div>
 
-        <!-- Linha de Gráficos Rosca (Doughnut Charts - Estilo Referência) -->
-        <div class="dashboard-doughnuts-row mt-4">
-          
-          <div class="doughnut-card glass-panel">
-            <h4 class="doughnut-title"><i data-lucide="pie-chart"></i> Cobertura de Pontos</h4>
-            <div class="doughnut-body">
-              <div class="doughnut-canvas-box">
-                <canvas id="doughnutChart1"></canvas>
-                <div class="doughnut-center-label">
-                  <span class="center-percent">70%</span>
-                  <span class="center-sub">Pontos</span>
-                </div>
-              </div>
-              <div class="doughnut-legend-list">
-                <div class="legend-item"><span class="dot green"></span> Monitorado (70%)</div>
-                <div class="legend-item"><span class="dot light-green"></span> Em análise (20%)</div>
-                <div class="legend-item"><span class="dot muted"></span> Futuro (10%)</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="doughnut-card glass-panel">
-            <h4 class="doughnut-title"><i data-lucide="activity"></i> Distribuição de Risco</h4>
-            <div class="doughnut-body">
-              <div class="doughnut-canvas-box">
-                <canvas id="doughnutChart2"></canvas>
-                <div class="doughnut-center-label">
-                  <span class="center-percent">30%</span>
-                  <span class="center-sub">Ativos</span>
-                </div>
-              </div>
-              <div class="doughnut-legend-list">
-                <div class="legend-item"><span class="dot green"></span> Qualidade do Ar (38.4%)</div>
-                <div class="legend-item"><span class="dot emerald"></span> Temperatura (10.3%)</div>
-                <div class="legend-item"><span class="dot lime"></span> Umidade (5.3%)</div>
-                <div class="legend-item"><span class="dot soft"></span> Outros (3.0%)</div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
       </div>
-
-      <!-- ================= PARTE 3: CARD GRANDE DE AVISOS (DIREITA) ================= -->
-      <aside class="dashboard-right-column">
-        <div class="alerts-large-card glass-panel">
-          
-          <!-- Topo do Card de Avisos -->
-          <div class="alerts-header">
-            <div class="alerts-title-group">
-              <div class="pulse-dot-green"></div>
-              <h3>Alertas & Avisos</h3>
-            </div>
-            <span class="alerts-count-badge">{{ envService.alerts().length }} Ativos</span>
-          </div>
-
-          <p class="panel-subtitle mb-3">Monitoramento contínuo em {{ envService.selectedCity() }}</p>
-
-          <div class="panel-divider mb-3"></div>
-
-          <!-- Seção Principal: Alertas Ativos ou Estado Limpo -->
-          <div class="alerts-content-section">
-            
-            <!-- Estado Quando NÃO Há Alertas Ativos -->
-            <div *ngIf="envService.alerts().length === 0" class="empty-alerts-state">
-              <div class="safe-icon-circle">
-                <i data-lucide="shield-check"></i>
-              </div>
-              <h4>Nenhum Alerta Crítico</h4>
-              <p class="text-sub small">
-                Todos os parâmetros ambientais monitorados estão operando dentro da faixa de normalidade.
-              </p>
-            </div>
-
-            <!-- Lista de Alertas Reais -->
-            <div *ngIf="envService.alerts().length > 0" class="alerts-list">
-              <div *ngFor="let alert of envService.alerts()" class="alert-card-item {{ alert.severity }}">
-                <div class="alert-item-header">
-                  <span class="alert-title">{{ alert.title }}</span>
-                  <span class="severity-tag {{ alert.severity }}">{{ alert.severity }}</span>
-                </div>
-                <p class="alert-desc">{{ alert.description }}</p>
-                <div class="alert-footer">
-                  <span><i data-lucide="map-pin"></i> {{ alert.location }}</span>
-                  <span><i data-lucide="clock"></i> {{ alert.timestamp }}</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="panel-divider my-3"></div>
-
-          <!-- Parecer Inteligente da IA Gemma -->
-          <div class="gemma-notice-card">
-            <div class="notice-header">
-              <i data-lucide="sparkles"></i>
-              <span>Parecer da IA Gemma</span>
-            </div>
-            <p class="notice-text">
-              Acompanhe a umidade relativa e o índice UV durante o período da tarde. Nenhuma anomalia grave registrada.
-            </p>
-          </div>
-
-          <div class="panel-divider my-3"></div>
-
-          <!-- Atalho para Gestão de Limites -->
-          <a routerLink="/alertas" class="btn btn-glass btn-block">
-            <i data-lucide="sliders"></i> Configurar Limites de Alerta
-          </a>
-
-        </div>
-      </aside>
 
     </div>
   `,
   styles: [`
-    /* Layout em Colunas (Centro + Card Grande Direito) */
+    /* Layout em Coluna Única (Totalmente Expandido) */
     .dashboard-grid-layout {
       display: grid;
-      grid-template-columns: 1fr 380px;
+      grid-template-columns: 1fr;
       gap: 20px;
       align-items: start;
+      width: 100%;
     }
 
     /* Coluna Central */
@@ -253,6 +132,7 @@ declare const Chart: any;
       display: flex;
       flex-direction: column;
       gap: 16px;
+      width: 100%;
     }
 
     /* Hero Gemma Card */
@@ -330,147 +210,6 @@ declare const Chart: any;
     .inline-icon { vertical-align: middle; margin-right: 6px; width: 18px; height: 18px; color: #2E7D32; }
     .chart-container-box { height: 260px; position: relative; width: 100%; }
 
-    /* Linha de Gráficos Rosca */
-    .dashboard-doughnuts-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    .doughnut-card {
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .doughnut-title {
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: #1C1C1C;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .doughnut-body {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .doughnut-canvas-box {
-      width: 110px;
-      height: 110px;
-      position: relative;
-      flex-shrink: 0;
-    }
-    .doughnut-center-label {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-    }
-    .center-percent { font-size: 1.1rem; font-weight: 800; color: #2E7D32; line-height: 1; }
-    .center-sub { font-size: 0.65rem; color: #888; font-weight: 600; }
-    .doughnut-legend-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 0.78rem;
-      color: #555;
-    }
-    .legend-item { display: flex; align-items: center; gap: 8px; font-weight: 500; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-    .dot.green { background: #2E7D32; }
-    .dot.emerald { background: #4CAF50; }
-    .dot.lime { background: #81C784; }
-    .dot.light-green { background: #A5D6A7; }
-    .dot.soft { background: #C8E6C9; }
-    .dot.muted { background: #E0E0E0; }
-
-    /* Coluna Direita: Card Grande de Avisos */
-    .dashboard-right-column {
-      position: sticky;
-      top: 88px;
-    }
-    .alerts-large-card {
-      display: flex;
-      flex-direction: column;
-      padding: 28px 24px;
-      border: 1.5px solid rgba(46, 125, 50, 0.25);
-      border-radius: 24px;
-      background: rgba(255, 255, 255, 0.82);
-      backdrop-filter: blur(20px);
-      box-shadow: 0 12px 36px rgba(46, 125, 50, 0.1);
-      min-height: 520px;
-    }
-    .alerts-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-    .alerts-title-group { display: flex; align-items: center; gap: 10px; }
-    .alerts-title-group h3 { font-size: 1.1rem; font-weight: 700; color: #1C1C1C; }
-    .pulse-dot-green { width: 10px; height: 10px; background: #00E676; border-radius: 50%; box-shadow: 0 0 10px #00E676; }
-    .alerts-count-badge { font-size: 0.72rem; font-weight: 700; color: #2E7D32; background: rgba(46, 125, 50, 0.12); padding: 3px 10px; border-radius: 999px; }
-    
-    .panel-divider { height: 1px; background: rgba(220, 226, 235, 0.8); width: 100%; }
-    .my-3 { margin-top: 14px; margin-bottom: 14px; }
-
-    .alerts-content-section { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-
-    /* Estado de Sem Alertas */
-    .empty-alerts-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 28px 16px;
-      background: rgba(56, 142, 60, 0.04);
-      border: 1px solid rgba(56, 142, 60, 0.15);
-      border-radius: 20px;
-    }
-    .safe-icon-circle {
-      width: 52px;
-      height: 52px;
-      background: rgba(56, 142, 60, 0.12);
-      color: #2E7D32;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-      font-size: 1.4rem;
-    }
-    .empty-alerts-state h4 { font-size: 0.95rem; font-weight: 700; color: #2E7D32; margin-bottom: 4px; }
-
-    /* Lista de Alertas */
-    .alerts-list { display: flex; flex-direction: column; gap: 10px; }
-    .alert-card-item {
-      padding: 14px;
-      border-radius: 16px;
-      background: #FFF;
-      border: 1px solid rgba(220, 226, 235, 0.8);
-    }
-    .alert-card-item.critical { border-left: 4px solid #D32F2F; background: rgba(211, 47, 47, 0.04); }
-    .alert-card-item.warning { border-left: 4px solid #F57C00; background: rgba(245, 124, 0, 0.04); }
-    .alert-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-    .alert-title { font-size: 0.85rem; font-weight: 700; }
-    .severity-tag { font-size: 0.65rem; text-transform: uppercase; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
-    .severity-tag.critical { background: #D32F2F; color: #FFF; }
-    .severity-tag.warning { background: #F57C00; color: #FFF; }
-    .alert-desc { font-size: 0.78rem; color: #666; margin-bottom: 8px; }
-    .alert-footer { display: flex; gap: 12px; font-size: 0.72rem; color: #999; }
-
-    /* Parecer IA Gemma */
-    .gemma-notice-card {
-      background: linear-gradient(135deg, rgba(46, 125, 50, 0.08) 0%, rgba(21, 101, 192, 0.06) 100%);
-      border: 1px solid rgba(46, 125, 50, 0.2);
-      border-radius: 16px;
-      padding: 16px;
-    }
-    .notice-header { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 700; color: #2E7D32; margin-bottom: 6px; }
-    .notice-text { font-size: 0.8rem; color: #444; line-height: 1.45; }
-
-    .btn-block { width: 100%; text-decoration: none; justify-content: center; }
-
     /* ===== SKELETON / SHIMMER EFFECTS ===== */
     .shimmer-container { overflow: hidden; position: relative; }
     .shimmer {
@@ -498,26 +237,11 @@ declare const Chart: any;
 
     .shimmer-chart-header { width: 300px; height: 22px; margin-bottom: 14px; }
     .shimmer-chart-box { width: 100%; height: 240px; }
-    
-    .shimmer-sidebar-header { width: 150px; height: 24px; }
-    .shimmer-sidebar-box { width: 100%; height: 120px; }
 
     /* ===== Media Queries Responsivos ===== */
-    @media (max-width: 1280px) {
-      .dashboard-grid-layout {
-        grid-template-columns: 1fr;
-      }
-      .dashboard-right-column {
-        position: static;
-      }
-    }
-
     @media (max-width: 992px) {
       .metrics-grid-9 {
         grid-template-columns: repeat(2, 1fr);
-      }
-      .dashboard-doughnuts-row {
-        grid-template-columns: 1fr;
       }
     }
 
@@ -534,10 +258,6 @@ declare const Chart: any;
         justify-content: center;
         width: 100%;
       }
-      .doughnut-body {
-        flex-direction: column;
-        align-items: center;
-      }
     }
   `]
 })
@@ -547,17 +267,12 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   private apiUrl = 'http://localhost:8000/api/v1';
 
   isLoading = true;
-
   private mainChartInstance: any;
-  private doughnut1Instance: any;
-  private doughnut2Instance: any;
 
   ngAfterViewInit(): void {
-    // Simula 1.2 segundos de atraso de rede lenta antes de carregar o Dashboard
     setTimeout(() => {
       this.isLoading = false;
       
-      // Inicializa os ícones do Lucide
       setTimeout(() => {
         if (typeof lucide !== 'undefined') {
           lucide.createIcons();
@@ -570,8 +285,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.mainChartInstance) this.mainChartInstance.destroy();
-    if (this.doughnut1Instance) this.doughnut1Instance.destroy();
-    if (this.doughnut2Instance) this.doughnut2Instance.destroy();
   }
 
   private initCharts(): void {
@@ -579,11 +292,10 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
     const city = this.envService.selectedCity();
 
-    // 1. Carrega dados do Gráfico Histórico Híbrido da API
+    // Carrega dados do Gráfico Histórico da API
     this.http.get<any>(`${this.apiUrl}/charts/historical?city=${encodeURIComponent(city)}`)
       .pipe(
         catchError(() => {
-          // Fallback seguro de dados vazios ou mínimos se o backend estiver inacessível
           return of({
             labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
             lineData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -663,69 +375,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
                   ticks: { font: { family: 'Poppins', size: 10, weight: '600' } }
                 }
               }
-            }
-          });
-        }
-      });
-
-    // 2. Carrega dados dos dois Gráficos Doughnut (Rosca) da API
-    this.http.get<any>(`${this.apiUrl}/charts/doughnuts?city=${encodeURIComponent(city)}`)
-      .pipe(
-        catchError(() => {
-          // Fallback seguro de dados vazios para as roscas
-          return of({
-            doughnut1: [0, 0, 100],
-            doughnut2: [0, 0, 0, 100]
-          });
-        })
-      )
-      .subscribe(res => {
-        // Doughnut 1: Cobertura de Pontos
-        const d1Canvas = document.getElementById('doughnutChart1') as HTMLCanvasElement;
-        if (d1Canvas) {
-          if (this.doughnut1Instance) this.doughnut1Instance.destroy();
-
-          this.doughnut1Instance = new Chart(d1Canvas, {
-            type: 'doughnut',
-            data: {
-              labels: ['Monitorado', 'Em Análise', 'Futuro'],
-              datasets: [{
-                data: res.doughnut1 || [0, 0, 100],
-                backgroundColor: ['#2E7D32', '#A5D6A7', '#E0E0E0'],
-                borderWidth: 0,
-                hoverOffset: 4
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              cutout: '72%',
-              plugins: { legend: { display: false } }
-            }
-          });
-        }
-
-        // Doughnut 2: Distribuição de Risco
-        const d2Canvas = document.getElementById('doughnutChart2') as HTMLCanvasElement;
-        if (d2Canvas) {
-          if (this.doughnut2Instance) this.doughnut2Instance.destroy();
-
-          this.doughnut2Instance = new Chart(d2Canvas, {
-            type: 'doughnut',
-            data: {
-              labels: ['Qualidade do Ar', 'Temperatura', 'Umidade', 'Outros'],
-              datasets: [{
-                data: res.doughnut2 || [0, 0, 0, 100],
-                backgroundColor: ['#2E7D32', '#4CAF50', '#81C784', '#C8E6C9'],
-                borderWidth: 0,
-                hoverOffset: 4
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              cutout: '72%',
-              plugins: { legend: { display: false } }
             }
           });
         }

@@ -11,31 +11,7 @@ import { ChatMessage } from '../../core/models/environment.model';
   template: `
     <div class="chat-container glass-panel">
       
-      <!-- Lateral de Histórico e Ações -->
-      <div class="chat-sidebar">
-        <button (click)="clearChat()" class="btn btn-primary w-100 mb-4 new-chat-btn">
-          <i data-lucide="plus"></i> Nova Consulta
-        </button>
-        
-        <div class="sidebar-section">
-          <div class="chat-history-title"><i data-lucide="message-square"></i> SESSÕES ATIVAS</div>
-          <div class="history-item active">
-            <span class="pulse-dot"></span>
-            <div class="history-details">
-              <span class="history-name">Análise Geral</span>
-              <span class="history-meta">Agora mesmo</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="sidebar-info-card mt-auto">
-          <div class="info-icon"><i data-lucide="sparkles"></i></div>
-          <h5>Gemma 2B IT</h5>
-          <p>Otimizado para análise de indicadores climáticos locais.</p>
-        </div>
-      </div>
-
-      <!-- Área Principal da Conversa -->
+      <!-- Área Principal da Conversa (Pergunta & Resposta) -->
       <div class="chat-main">
         
         <!-- Header da Conversa -->
@@ -49,12 +25,15 @@ import { ChatMessage } from '../../core/models/environment.model';
                 <h4>Assistente Gemma AI</h4>
                 <span class="model-badge">LLM</span>
               </div>
-              <span class="status-subtitle"><span class="pulse-dot-green"></span> Conectado via backend seguro</span>
+              <span class="status-subtitle"><span class="pulse-dot-green"></span> Pergunta & Resposta em tempo real</span>
             </div>
           </div>
+          <button (click)="clearChat()" class="btn btn-secondary btn-sm" title="Limpar conversa">
+            <i data-lucide="rotate-ccw"></i> Limpar
+          </button>
         </div>
 
-        <!-- Stream das Mensagens -->
+        <!-- Stream de Perguntas e Respostas -->
         <div class="chat-stream">
           <div *ngFor="let msg of gemmaService.chatHistory()" class="chat-msg" [ngClass]="msg.sender">
             <div class="msg-avatar" *ngIf="msg.sender === 'gemma'">
@@ -68,7 +47,7 @@ import { ChatMessage } from '../../core/models/environment.model';
             </div>
           </div>
 
-          <!-- Balão de Digitação / Carregamento da IA -->
+          <!-- Indicador de Digitação -->
           <div *ngIf="gemmaService.isTyping()" class="chat-msg gemma typing">
             <div class="msg-avatar">
               <img src="/icon.svg" alt="Gemma Logo" class="avatar-logo-img">
@@ -85,9 +64,9 @@ import { ChatMessage } from '../../core/models/environment.model';
           </div>
         </div>
 
-        <!-- Barra de Sugestões Rápidas -->
+        <!-- Sugestões Rápidas -->
         <div class="quick-prompts-bar">
-          <span class="quick-title"><i data-lucide="lightbulb"></i> Perguntar:</span>
+          <span class="quick-title"><i data-lucide="lightbulb"></i> Sugestões:</span>
           <div class="chips-container">
             <button *ngFor="let prompt of gemmaService.defaultPrompts" (click)="sendPrompt(prompt)" class="prompt-chip">
               {{ prompt }}
@@ -95,11 +74,11 @@ import { ChatMessage } from '../../core/models/environment.model';
           </div>
         </div>
 
-        <!-- Campo de Entrada da Mensagem -->
+        <!-- Campo de Entrada -->
         <div class="chat-input-box-wrapper">
           <div class="chat-input-capsule">
             <i data-lucide="message-square" class="input-icon"></i>
-            <input type="text" [(ngModel)]="messageText" (keyup.enter)="sendMessage()" placeholder="Escreva sua pergunta para a IA Gemma...">
+            <input type="text" [(ngModel)]="messageText" (keyup.enter)="sendMessage()" placeholder="Digite sua pergunta ambiental...">
             <button (click)="sendMessage()" class="send-btn" title="Enviar Mensagem">
               <i data-lucide="send"></i>
             </button>
@@ -118,83 +97,24 @@ import { ChatMessage } from '../../core/models/environment.model';
       overflow: hidden;
       border: 1.5px solid rgba(46, 125, 50, 0.22);
       box-shadow: 0 16px 40px rgba(46, 125, 50, 0.08);
+      border-radius: 24px;
     }
     
-    /* Sidebar */
-    .chat-sidebar {
-      width: 280px;
-      background: rgba(255, 255, 255, 0.65);
-      border-right: 1px solid rgba(46, 125, 50, 0.15);
-      padding: 24px 18px;
-      display: flex;
-      flex-direction: column;
-      backdrop-filter: blur(10px);
-    }
-    .new-chat-btn {
-      box-shadow: 0 6px 16px rgba(46, 125, 50, 0.2);
-    }
-    .chat-history-title {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #777;
-      margin-bottom: 12px;
-      letter-spacing: 0.8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .history-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: 16px;
-      background: rgba(46, 125, 50, 0.08);
-      border: 1px solid rgba(46, 125, 50, 0.15);
-      cursor: pointer;
-      transition: all 0.25s;
-    }
-    .history-item:hover {
-      background: rgba(46, 125, 50, 0.12);
-      transform: translateX(3px);
-    }
-    .history-item .pulse-dot {
-      width: 8px; height: 8px; background: #00E676; border-radius: 50%; box-shadow: 0 0 8px #00E676;
-    }
-    .history-details { display: flex; flex-direction: column; }
-    .history-name { font-size: 0.85rem; font-weight: 600; color: #2E7D32; }
-    .history-meta { font-size: 0.68rem; color: #777; }
-
-    .sidebar-info-card {
-      background: linear-gradient(135deg, rgba(46, 125, 50, 0.08) 0%, rgba(21, 101, 192, 0.05) 100%);
-      border: 1px solid rgba(46, 125, 50, 0.2);
-      border-radius: 20px;
-      padding: 16px;
-    }
-    .info-icon {
-      width: 32px; height: 32px;
-      background: rgba(46, 125, 50, 0.12);
-      color: #2E7D32;
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 10px;
-      font-size: 0.9rem;
-    }
-    .sidebar-info-card h5 { font-size: 0.88rem; font-weight: 700; color: #2E7D32; margin-bottom: 4px; }
-    .sidebar-info-card p { font-size: 0.75rem; color: #555; line-height: 1.4; }
-
-    /* Main Chat Area */
     .chat-main {
       flex: 1;
       display: flex;
       flex-direction: column;
       background: rgba(255, 255, 255, 0.4);
+      width: 100%;
     }
     
     .chat-header {
       padding: 18px 24px;
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.85);
       border-bottom: 1px solid rgba(46, 125, 50, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
     .chat-gemma-info { display: flex; align-items: center; gap: 14px; }
     .avatar-gemma-small {
@@ -209,7 +129,7 @@ import { ChatMessage } from '../../core/models/environment.model';
     .avatar-logo-img { width: 100%; height: 100%; object-fit: contain; }
     
     .header-name-row { display: flex; align-items: center; gap: 8px; }
-    .header-name-row h4 { font-size: 1rem; font-weight: 700; color: #1C1C1C; }
+    .header-name-row h4 { font-size: 1rem; font-weight: 700; color: #1C1C1C; margin: 0; }
     .model-badge {
       font-size: 0.65rem; font-weight: 700; color: #1565C0;
       background: rgba(21, 101, 192, 0.1); padding: 2px 6px; border-radius: 6px;
@@ -217,7 +137,7 @@ import { ChatMessage } from '../../core/models/environment.model';
     .status-subtitle { font-size: 0.72rem; color: #2E7D32; font-weight: 600; display: flex; align-items: center; gap: 4px; }
     .pulse-dot-green { width: 6px; height: 6px; background: #00E676; border-radius: 50%; box-shadow: 0 0 6px #00E676; }
 
-    /* Messages Stream */
+    /* Stream das Mensagens */
     .chat-stream {
       flex: 1;
       padding: 24px;
@@ -227,7 +147,7 @@ import { ChatMessage } from '../../core/models/environment.model';
       gap: 16px;
       background: rgba(245, 247, 245, 0.35);
     }
-    .chat-msg { display: flex; gap: 12px; max-width: 80%; }
+    .chat-msg { display: flex; gap: 12px; max-width: 85%; }
     .chat-msg.gemma { align-self: flex-start; }
     .chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
     
@@ -268,7 +188,7 @@ import { ChatMessage } from '../../core/models/environment.model';
     .msg-time { font-size: 0.68rem; color: #999; text-align: right; }
     .chat-msg.user .msg-time { color: rgba(255, 255, 255, 0.7); text-align: left; }
 
-    /* Quick suggestions bar */
+    /* Barra de Sugestões */
     .quick-prompts-bar {
       padding: 12px 24px;
       background: rgba(255, 255, 255, 0.8);
@@ -315,7 +235,7 @@ import { ChatMessage } from '../../core/models/environment.model';
       transform: translateY(-1px);
     }
 
-    /* Input box wrapper */
+    /* Entrada de Texto */
     .chat-input-box-wrapper {
       padding: 20px 24px;
       background: rgba(255, 255, 255, 0.95);
@@ -360,12 +280,6 @@ import { ChatMessage } from '../../core/models/environment.model';
       background: #1B5E20;
       box-shadow: 0 6px 16px rgba(0, 230, 118, 0.35);
       transform: scale(1.05);
-    }
-
-    @media (max-width: 900px) {
-      .chat-sidebar { display: none; }
-      .chat-msg { max-width: 90%; }
-      .quick-prompts-bar { flex-direction: column; align-items: flex-start; gap: 6px; }
     }
 
     /* Typing Indicator Animation */
