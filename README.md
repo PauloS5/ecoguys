@@ -18,6 +18,10 @@ O **EcoWatch AI** é um sistema de acompanhamento de indicadores ambientais (tem
 | **Chart.js** | Gráficos de evolução dos indicadores |
 | **Lucide Icons** | Biblioteca de ícones da interface |
 | **Poppins (Google Fonts)** | Tipografia oficial |
+| **Python** | Integração backend e consumo da API de Inteligência Artificial |
+| **Gemma 3 4B** | Modelo de Inteligência Artificial (LLM) do Google |
+| **LM Studio** | Servidor local para inferência da IA no formato OpenAI |
+| **Ngrok** | Túnel seguro para exposição da API de IA local para a internet |
 
 ---
 
