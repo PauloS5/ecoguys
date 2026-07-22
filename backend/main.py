@@ -71,11 +71,15 @@ client = OpenAI(
     api_key="lm-studio"
 )
 
+import json
+
 class ChatRequest(BaseModel):
     prompt: str
     system_prompt: str = "Você é um assistente direto, focado e responde de forma objetiva."
     temperature: float = 0.7
     max_tokens: int = 800
+    cidade: str | None = "São Paulo" # Padrão
+    uf: str | None = "SP" # Padrão
 
 class ChatResponse(BaseModel):
     response: str
@@ -83,10 +87,39 @@ class ChatResponse(BaseModel):
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat_with_ai(request: ChatRequest):
     try:
+        context_prompt = request.system_prompt
+        
+        # Se tiver cidade e uf, busca os dados da API do amigo e anexa ao contexto
+        if request.cidade and request.uf:
+            try:
+                clima_atual = obter_clima_atual(request.cidade, request.uf)
+                # Pegando apenas os próximos 3 períodos de previsão para não estourar o limite de tokens da IA
+                previsao = obter_previsao(request.cidade, request.uf)
+                if "list" in previsao:
+                    previsao["list"] = previsao["list"][:3]
+                
+                regras_analise = (
+                    "\n\nDIRETRIZES DE ANÁLISE E CÁLCULO DE RISCO AMBIENTAL:\n"
+                    "1. Risco de Queimadas (Fórmula de Angstrom adaptada): Se a umidade for < 30% e a temperatura > 30°C (ou > 303K), alerte para ALTO RISCO de queimadas. Ventos rápidos (wind speed > 5 m/s) agravam isso para RISCO CRÍTICO.\n"
+                    "2. Saúde e Ar: Umidade < 20% = Estado de Emergência (risco respiratório grave). Umidade < 30% = Estado de Atenção.\n"
+                    "3. Conforto Térmico: Temperatura alta associada a alta umidade (>70%) aumenta o risco de exaustão térmica (sensação térmica elevada).\n"
+                    "4. Tempestades: Observe o campo 'pop' (probabilidade de precipitação) e ventos na previsão. Ventos muito fortes podem indicar tempestade iminente.\n"
+                    "Use essas regras matemáticas em sua mente para 'prever' e deduzir a situação quando o usuário perguntar. Converta a temperatura (se estiver em Kelvin) para Celsius (C = K - 273.15) antes de entregar ao usuário.\n"
+                )
+
+                context_prompt += regras_analise + (
+                    f"\nINFORMAÇÃO DE CONTEXTO AMBIENTAL ({request.cidade}-{request.uf}):\n"
+                    f"Clima Atual (JSON): {json.dumps(clima_atual)}\n"
+                    f"Previsão Curta (JSON): {json.dumps(previsao)}\n\n"
+                    "Use os dados JSON acima para responder às perguntas do usuário cruzando com as Diretrizes de Análise acima."
+                )
+            except Exception as e:
+                print(f"Erro ao buscar dados de clima: {e}")
+
         completion = client.chat.completions.create(
             model="google/gemma-3-4b", 
             messages=[
-                {"role": "system", "content": request.system_prompt},
+                {"role": "system", "content": context_prompt},
                 {"role": "user", "content": request.prompt}
             ],
             temperature=request.temperature,
