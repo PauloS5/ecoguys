@@ -39,13 +39,25 @@ export class EnvironmentService {
     this.http.get<EnvironmentalIndicator[]>(`${this.apiUrl}/indicators?city=${encodeURIComponent(city)}`)
       .pipe(
         catchError(() => {
-          // Mantém as chaves vazias ou limpas caso a API falhe temporariamente
           return of([]);
         })
       )
       .subscribe(data => {
         if (data && data.length > 0) {
           this.indicators.set(data);
+        } else {
+          // Reset to default if API fails or returns empty
+          this.indicators.set([
+            { id: '1', name: 'Temperatura', value: '--', unit: '°C', status: 'info', icon: 'thermometer', category: 'temperature' },
+            { id: '2', name: 'Umidade Relativa', value: '--', unit: '%', status: 'info', icon: 'droplets', category: 'humidity' },
+            { id: '3', name: 'Precipitação (1h)', value: '--', unit: 'mm', status: 'info', icon: 'cloud-rain', category: 'rain' },
+            { id: '4', name: 'Vento', value: '--', unit: 'km/h', status: 'info', icon: 'wind', category: 'wind' },
+            { id: '5', name: 'Qualidade do Ar', value: '--', unit: 'AQI', status: 'info', icon: 'activity', category: 'aqi' },
+            { id: '6', name: 'Sensação Térmica', value: '--', unit: '°C', status: 'info', icon: 'sun-dim', category: 'uv' },
+            { id: '7', name: 'Pressão Atmosférica', value: '--', unit: 'hPa', status: 'info', icon: 'gauge', category: 'river' },
+            { id: '8', name: 'Nebulosidade', value: '--', unit: '%', status: 'info', icon: 'cloud', category: 'fire' },
+            { id: '9', name: 'Visibilidade', value: '--', unit: 'km', status: 'info', icon: 'eye', category: 'vegetation' }
+          ]);
         }
       });
 
@@ -56,7 +68,7 @@ export class EnvironmentService {
         })
       )
       .subscribe(data => {
-        this.alerts.set(data);
+        this.alerts.set(data || []);
       });
   }
 }
