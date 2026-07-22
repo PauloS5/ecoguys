@@ -58,7 +58,7 @@ declare const Chart: any;
         <div class="hero-gemma-card glass-panel">
           <div class="gemma-avatar-box">
             <div class="gemma-avatar">
-              <i data-lucide="sparkles"></i>
+              <img src="/icon.svg" alt="EcoWatch Logo" style="width: 100%; height: 100%; object-fit: contain;">
             </div>
           </div>
           <div class="gemma-content">
@@ -104,8 +104,8 @@ declare const Chart: any;
         <div class="chart-panel glass-panel mt-4">
           <div class="panel-header mb-3">
             <div>
-              <h3><i data-lucide="bar-chart-3" class="inline-icon"></i> Previsão Climática (Próximos 5 Dias)</h3>
-              <p class="panel-subtitle">Variação de temperatura e umidade para os próximos dias (intervalos de 3h)</p>
+              <h3><i data-lucide="bar-chart-3" class="inline-icon"></i> Environmental Analytics</h3>
+              <p class="panel-subtitle">Análise histórica mensal com barras arredondadas e curva de tendência</p>
             </div>
           </div>
           <div class="chart-container-box">
@@ -133,6 +133,7 @@ declare const Chart: any;
       flex-direction: column;
       gap: 16px;
       width: 100%;
+      min-width: 0;
     }
 
     /* Hero Gemma Card */
@@ -149,13 +150,9 @@ declare const Chart: any;
     .gemma-avatar {
       width: 64px;
       height: 64px;
-      background: linear-gradient(135deg, #2E7D32, #1B5E20);
-      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #FFF;
-      box-shadow: 0 8px 22px rgba(46, 125, 50, 0.35);
     }
     .gemma-badge {
       display: inline-flex;
@@ -169,8 +166,8 @@ declare const Chart: any;
       border-radius: 999px;
       margin-bottom: 8px;
     }
-    .gemma-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 6px; color: #1C1C1C; }
-    .gemma-text { font-size: 0.88rem; color: #666; margin-bottom: 16px; line-height: 1.5; }
+    .gemma-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 6px; color: #1C1C1C; word-wrap: break-word; overflow-wrap: break-word; }
+    .gemma-text { font-size: 0.88rem; color: #666; margin-bottom: 16px; line-height: 1.5; word-wrap: break-word; overflow-wrap: break-word; }
     .gemma-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
     /* Indicadores */
@@ -248,6 +245,9 @@ declare const Chart: any;
     @media (max-width: 600px) {
       .metrics-grid-9 {
         grid-template-columns: 1fr;
+      }
+      .metric-card {
+        padding: 16px;
       }
       .hero-gemma-card {
         flex-direction: column;

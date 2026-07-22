@@ -38,6 +38,9 @@ import { CommonModule } from '@angular/common';
     .config-sections-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px; }
     .config-card { padding: 16px; }
     .config-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+    @media (max-width: 768px) {
+      .config-sections-grid { grid-template-columns: 1fr; }
+    }
   `]
 })
 export class SettingsComponent {}

@@ -198,6 +198,7 @@ body::after {
   padding: var(--space-md);
   position: relative;
   z-index: 1;
+  width: 100%;
 }
 
 .glass-card {
@@ -214,6 +215,12 @@ body::after {
   position: relative;
   z-index: 1;
   overflow: hidden;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .glass-panel { padding: 16px; border-radius: 20px; }
+  .glass-card { padding: 16px; border-radius: 16px; }
 }
 
 /* Sheen Light Effect on Hover */

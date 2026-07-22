@@ -145,7 +145,7 @@ declare const lucide: any;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      height: calc(100vh - 105px);
+      height: calc(100vh - 110px);
     }
 
     .map-breadcrumb {
@@ -239,7 +239,7 @@ declare const lucide: any;
     .filter-chip input[type="checkbox"] { accent-color: #2E7D32; }
 
     .map-body { flex: 1; display: flex; gap: 12px; min-height: 0; }
-    .map-frame { flex: 1; position: relative; overflow: hidden; padding: 0; border-radius: 24px; }
+    .map-frame { flex: 1; position: relative; overflow: hidden; padding: 0; border-radius: 24px; height: 100%; }
     .map-frame.with-panel { flex: 2; }
     .leaflet-map { width: 100%; height: 100%; border-radius: 24px; z-index: 1; }
 
@@ -268,16 +268,6 @@ declare const lucide: any;
       animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes pulseFire {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.8); }
-      70% { transform: scale(1.15); box-shadow: 0 0 0 14px rgba(211, 47, 47, 0); }
-      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
-    }
-    @keyframes pulseWarning {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 124, 0, 0.8); }
-      70% { transform: scale(1.15); box-shadow: 0 0 0 14px rgba(245, 124, 0, 0); }
-      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 124, 0, 0); }
-    }
 
     .map-back-btn {
       position: absolute;
@@ -334,11 +324,11 @@ declare const lucide: any;
     .alert-desc { font-size: 0.75rem; color: #666; }
     .panel-cta { margin-top: auto; text-decoration: none; width: 100%; }
 
-    @media (max-width: 768px) {
-      .map-view-container { height: auto; min-height: calc(100vh - 120px); }
-      .map-body { flex-direction: column; }
-      .map-frame { height: 420px; }
-      .side-panel { width: 100%; max-height: 400px; }
+    @media (max-width: 1024px) {
+      .map-view-container { height: auto; min-height: none; gap: 16px; }
+      .map-body { flex-direction: column; height: auto; min-height: auto; }
+      .map-frame { height: 500px; flex: none; width: 100%; }
+      .side-panel { width: 100%; max-height: none; flex: none; }
     }
   `]
 })
@@ -407,6 +397,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     await this.loadEstados();
     this.addEnvironmentalHotspots();
+
+    // Fix for Leaflet tiles getting cut off when container resizes
+    if (window.ResizeObserver) {
+      new ResizeObserver(() => {
+        if (this.map) {
+          this.map.invalidateSize();
+        }
+      }).observe(this.mapElement.nativeElement);
+    }
   }
 
   changeBasemap(type: 'dark' | 'satellite' | 'voyager'): void {
@@ -482,50 +481,38 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (!this.markersGroup) return;
     this.markersGroup.clearLayers();
 
-    // Hotspots simulados para demonstração de emergências pelo Brasil
-    const mockHotspots = [
-      { lat: -3.465, lng: -62.215, city: 'Amazônia Central', title: 'Foco Extremo de Calor e Fumaça', type: 'fire' },
-      { lat: -15.793, lng: -47.882, city: 'Brasília - DF', title: 'Umidade do ar crítica (< 15%)', type: 'warning' },
-      { lat: -23.550, lng: -46.633, city: 'São Paulo - SP', title: 'Qualidade do ar péssima (Excesso de PM2.5)', type: 'warning' },
-      { lat: -19.916, lng: -43.934, city: 'Belo Horizonte - MG', title: 'Risco de queimadas (Atenção)', type: 'warning' },
-      { lat: -9.974, lng: -67.810, city: 'Rio Branco - AC', title: 'Condições Seguras (IA)', type: 'safe' }
-    ];
+    // Busca os focos e estações em tempo real da API
+    this.http.get<any[]>(`${this.apiUrl}/map/hotspots`)
+      .pipe(
+        catchError(() => {
+          // Retorna lista vazia caso a API de backend de hotspots não esteja ativa
+          return of([]);
+        })
+      )
+      .subscribe((points: any[]) => {
+        points.forEach((pt: any) => {
+          const color = pt.type === 'fire' ? '#D32F2F' : pt.type === 'warning' ? '#F57C00' : '#00E676';
+          
+          const customIcon = L.divIcon({
+            className: 'custom-map-pin',
+            html: `<div style="
+              width: 22px; height: 22px; border-radius: 50%;
+              background: ${color}; border: 3px solid #FFF;
+              box-shadow: 0 0 14px ${color}; animation: pulsePin 1.5s infinite alternate;
+            "></div>`,
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
+          });
 
-    mockHotspots.forEach((pt: any) => {
-      let color = '#00E676';
-      let shadowColor = 'rgba(0, 230, 118, 0.4)';
-      let animation = '';
-      
-      if (pt.type === 'fire') {
-        color = '#D32F2F';
-        shadowColor = 'rgba(211, 47, 47, 0.6)';
-        animation = 'pulseFire';
-      } else if (pt.type === 'warning') {
-        color = '#F57C00';
-        shadowColor = 'rgba(245, 124, 0, 0.6)';
-        animation = 'pulseWarning';
-      }
+          const marker = L.marker([pt.lat, pt.lng], { icon: customIcon });
+          marker.bindTooltip(`<strong>${pt.city}</strong><br/>${pt.title}`, {
+            className: 'map-tooltip',
+            direction: 'top'
+          });
 
-      const customIcon = L.divIcon({
-        className: 'custom-map-pin',
-        html: `<div style="
-          width: 22px; height: 22px; border-radius: 50%;
-          background: ${color}; border: 3px solid #FFF;
-          box-shadow: 0 0 16px ${shadowColor};
-          animation: ${animation} 1.5s infinite;
-        "></div>`,
-        iconSize: [22, 22],
-        iconAnchor: [11, 11]
+          marker.addTo(this.markersGroup);
+        });
       });
-
-      const marker = L.marker([pt.lat, pt.lng], { icon: customIcon });
-      marker.bindTooltip(`<strong>${pt.city}</strong><br/>${pt.title}`, {
-        className: 'map-tooltip',
-        direction: 'top'
-      });
-
-      marker.addTo(this.markersGroup);
-    });
   }
 
   private async drillDownToState(codUF: string, bounds: any): Promise<void> {
@@ -584,13 +571,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.selectedMunicipalityName = name;
     this.showPanel = true;
     this.mapService.navigateToMunicipality(stateCode, municipalityCode, name);
-    
-    // Atualiza todo o sistema (Dashboard e Relatórios) com a cidade escolhida
-    const ufSigla = this.mapService.getStateSigla(stateCode);
-    if (ufSigla) {
-      this.envService.updateCity(`${name} - ${ufSigla}`);
-    }
-
     setTimeout(() => this.refreshIcons(), 50);
   }
 

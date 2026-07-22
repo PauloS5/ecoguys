@@ -105,7 +105,7 @@ declare const lucide: any;
   styles: [`
     .floating-chat-wrapper {
       position: fixed;
-      bottom: 24px;
+      bottom: 90px;
       right: 24px;
       z-index: 9999;
       font-family: var(--font-family);
@@ -330,7 +330,7 @@ declare const lucide: any;
     /* ===== Responsividade Mobile ===== */
     @media (max-width: 480px) {
       .floating-chat-wrapper {
-        bottom: 16px;
+        bottom: 90px;
         right: 16px;
       }
       .floating-chat-window {

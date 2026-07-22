@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { EnvironmentService } from '../../services/environment.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -8,9 +9,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   imports: [CommonModule, RouterLink, RouterLinkActive],
   template: `
     <!-- Overlay transparente para fechar no mobile -->
-    <div *ngIf="isOpenMobile" (click)="toggleMobileMenu()" class="sidebar-mobile-overlay"></div>
+    <div *ngIf="envService.mobileMenuOpen()" (click)="toggleMobileMenu()" class="sidebar-mobile-overlay"></div>
 
-    <aside class="sidebar glass-panel" [class.mobile-open]="isOpenMobile">
+    <aside class="sidebar glass-panel" [class.mobile-open]="envService.mobileMenuOpen()">
       <div class="sidebar-header">
         <div class="logo-box">
           <img src="/icon.svg" alt="EcoWatch AI Logo" class="brand-logo-img">
@@ -117,7 +118,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     .nav-item:hover { background: rgba(46, 125, 50, 0.1); color: #2E7D32; transform: translateX(4px); }
     .nav-item.active { background: linear-gradient(135deg, #2E7D32, #1B5E20); color: #FFF; font-weight: 600; box-shadow: 0 6px 18px rgba(46, 125, 50, 0.25); }
     .badge-sparkle { margin-left: auto; font-size: 0.7rem; font-weight: 700; background: linear-gradient(135deg, #1565C0, #FB8C00); color: #FFF; padding: 2px 8px; border-radius: 999px; }
-    .badge-alert-count { margin-left: auto; font-size: 0.75rem; background: #D32F2F; color: #FFF; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    
     .sidebar-footer { margin-top: auto; padding-top: 16px; }
     .ai-status-card { background: rgba(46, 125, 50, 0.08); border: 1px solid rgba(46, 125, 50, 0.2); border-radius: 16px; padding: 12px; }
     .ai-status-indicator { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600; color: #2E7D32; }
@@ -127,27 +128,27 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     /* ===== Media Query Responsivo ===== */
     @media (max-width: 1024px) {
       .sidebar {
-        transform: translateX(-280px);
+        transform: translateX(-300px);
         box-shadow: none;
       }
       .sidebar.mobile-open {
         transform: translateX(0);
         box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
       }
-      .mobile-close-btn { display: block; }
+      .mobile-close-btn { display: block; padding: 8px; }
     }
   `]
 })
 export class SidebarComponent {
-  isOpenMobile = false;
+  envService = inject(EnvironmentService);
 
   toggleMobileMenu(): void {
-    this.isOpenMobile = !this.isOpenMobile;
+    this.envService.mobileMenuOpen.set(!this.envService.mobileMenuOpen());
   }
 
   closeMobileOnNav(): void {
-    if (this.isOpenMobile) {
-      this.isOpenMobile = false;
+    if (this.envService.mobileMenuOpen()) {
+      this.envService.mobileMenuOpen.set(false);
     }
   }
 }

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
-import { EnvironmentService } from '../../core/services/environment.service';
 
 declare const lucide: any;
 
@@ -112,7 +111,7 @@ interface CityIBGE {
         </div>
 
         <div class="report-text-content">
-          <div class="formatted-text" [innerHTML]="formatMarkdown(reportText)"></div>
+          <pre class="formatted-text">{{ reportText }}</pre>
         </div>
       </div>
 
@@ -220,20 +219,12 @@ interface CityIBGE {
       margin-top: 16px;
     }
     .formatted-text {
+      white-space: pre-wrap;
       font-family: 'Poppins', sans-serif;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       line-height: 1.75;
       color: #2B2B2B;
       margin: 0;
-    }
-    .formatted-text strong {
-      color: #1C1C1C;
-    }
-    .formatted-text h1, .formatted-text h2, .formatted-text h3 {
-      color: #2E7D32;
-      font-weight: 700;
-      margin-top: 16px;
-      margin-bottom: 8px;
     }
 
     @media (max-width: 992px) {
@@ -244,15 +235,14 @@ interface CityIBGE {
 })
 export class ReportsComponent implements OnInit {
   private http = inject(HttpClient);
-  private envService = inject(EnvironmentService);
   private apiUrl = 'http://127.0.0.1:8000/api';
   private ibgeUrl = 'https://servicodados.ibge.gov.br/api/v1/localidades';
 
   statesList: StateIBGE[] = [];
   availableCities: CityIBGE[] = [];
 
-  selectedStateSigla = '';
-  selectedCity = '';
+  selectedStateSigla = 'AC';
+  selectedCity = 'Rio Branco';
   selectedPeriod = 'Últimos 7 dias';
 
   loadingStates = true;
@@ -264,12 +254,6 @@ export class ReportsComponent implements OnInit {
   copied = false;
 
   ngOnInit(): void {
-    const globalCity = this.envService.selectedCity();
-    if (globalCity && globalCity.includes(' - ')) {
-      const parts = globalCity.split(' - ');
-      this.selectedCity = parts[0].trim();
-      this.selectedStateSigla = parts[1].trim();
-    }
     this.fetchStates();
   }
 
@@ -293,21 +277,19 @@ export class ReportsComponent implements OnInit {
         this.statesList = states;
         this.loadingStates = false;
         if (states.length > 0) {
-          if (!this.selectedStateSigla || !states.find(s => s.sigla === this.selectedStateSigla)) {
-            this.selectedStateSigla = states[0].sigla;
-          }
-          this.fetchCities(this.selectedStateSigla, true);
+          this.selectedStateSigla = states[0].sigla;
+          this.fetchCities(this.selectedStateSigla);
         }
       });
   }
 
   onStateChange(): void {
     if (this.selectedStateSigla) {
-      this.fetchCities(this.selectedStateSigla, false);
+      this.fetchCities(this.selectedStateSigla);
     }
   }
 
-  fetchCities(uf: string, keepSelectedCity: boolean = false): void {
+  fetchCities(uf: string): void {
     this.loadingCities = true;
     this.http.get<CityIBGE[]>(`${this.ibgeUrl}/estados/${uf}/municipios?orderBy=nome`)
       .pipe(
@@ -322,9 +304,7 @@ export class ReportsComponent implements OnInit {
         this.availableCities = cities;
         this.loadingCities = false;
         if (cities.length > 0) {
-          if (!keepSelectedCity || !this.selectedCity || !cities.find(c => c.nome === this.selectedCity)) {
-            this.selectedCity = cities[0].nome;
-          }
+          this.selectedCity = cities[0].nome;
         }
       });
   }
@@ -385,16 +365,5 @@ export class ReportsComponent implements OnInit {
         lucide.createIcons();
       }
     }, 100);
-  }
-
-  formatMarkdown(text: string): string {
-    if (!text) return '';
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      .replace(/\n/g, '<br>');
   }
 }

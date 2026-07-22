@@ -129,9 +129,11 @@ interface CityIBGE {
     }
 
     @media (max-width: 768px) {
+      .header { height: auto; min-height: 72px; padding: 12px 16px; align-items: flex-start; }
+      .header-left { align-items: flex-start; }
       .header-location-group { flex-direction: column; gap: 6px; align-items: flex-start; }
-      .location-selector { padding: 4px 8px; }
-      .location-selector select { font-size: 0.78rem; }
+      .location-selector { padding: 4px 8px; width: 100%; max-width: 200px; }
+      .location-selector select { font-size: 0.78rem; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 100%; }
       .hide-mobile { display: none !important; }
       .header-left, .header-right { gap: 8px; }
     }
@@ -218,14 +220,7 @@ export class HeaderComponent implements OnInit {
   }
 
   toggleMobileSidebar(): void {
-    const sidebarEl = document.querySelector('.sidebar') as HTMLElement;
-    const overlayEl = document.querySelector('.sidebar-mobile-overlay') as HTMLElement;
-    if (sidebarEl) {
-      sidebarEl.classList.toggle('mobile-open');
-    }
-    if (overlayEl) {
-      overlayEl.style.display = overlayEl.style.display === 'block' ? 'none' : 'block';
-    }
+    this.envService.mobileMenuOpen.set(!this.envService.mobileMenuOpen());
   }
 
   refreshData(): void {
