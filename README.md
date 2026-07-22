@@ -4,18 +4,22 @@ Plataforma web de monitoramento ambiental com inteligência artificial, desenvol
 
 ## 📋 Visão Geral
 
-O **EcoWatch AI** é um sistema de acompanhamento de indicadores ambientais (temperatura, umidade, qualidade do ar, focos de queimadas, entre outros) que utiliza **inteligência artificial (Gemma AI)** para interpretar dados e gerar relatórios automáticos em linguagem acessível.
+O **EcoWatch AI** é um sistema de acompanhamento de indicadores ambientais (temperatura, umidade, qualidade do ar, focos de queimadas, entre outros) que utiliza **inteligência artificial (Gemma AI)** para interpretar dados, responder dúvidas e gerar relatórios automáticos em linguagem acessível.
 
-## 🛠️ Tecnologias
+---
 
-| Tecnologia | Uso |
+## 🛠️ Tecnologias Utilizadas
+
+| Tecnologia | Uso / Aplicação |
 |---|---|
-| **Angular 18** | Framework frontend (Standalone Components) |
+| **Angular 18** | Framework frontend (Standalone Components & Signals) |
 | **Tailwind CSS (CDN)** | Estilização utilitária |
-| **Leaflet.js** | Mapa interativo |
-| **Chart.js** | Gráficos de indicadores |
-| **Lucide Icons** | Ícones da interface |
-| **Poppins (Google Fonts)** | Tipografia |
+| **Leaflet.js + API IBGE v3** | Mapa interativo com drill-down (Brasil ➔ Estado ➔ Município) |
+| **Chart.js** | Gráficos de evolução dos indicadores |
+| **Lucide Icons** | Biblioteca de ícones da interface |
+| **Poppins (Google Fonts)** | Tipografia oficial |
+
+---
 
 ## 🚀 Como Iniciar
 
@@ -24,7 +28,7 @@ O **EcoWatch AI** é um sistema de acompanhamento de indicadores ambientais (tem
 - **Node.js** versão 18 ou superior
 - **npm** versão 9 ou superior
 
-### Instalação
+### Passos para Execução
 
 ```bash
 # 1. Acesse a pasta do frontend
@@ -37,7 +41,7 @@ npm install
 npm start
 ```
 
-O projeto será iniciado em **http://localhost:4200**.
+O aplicativo estará acessível em **http://localhost:4200**.
 
 ### Build de Produção
 
@@ -46,48 +50,62 @@ cd frontend
 npm run build
 ```
 
-Os arquivos de produção serão gerados na pasta `frontend/dist/`.
+Os arquivos estáticos otimizados serão gerados em `frontend/dist/frontend`.
 
-## 📁 Estrutura do Projeto
+---
+
+## 📁 Estrutura Atualizada do Repositório
 
 ```
-frontend/
-├── src/
-│   ├── app/
-│   │   ├── core/
-│   │   │   ├── components/     # Sidebar e Header
-│   │   │   ├── models/         # Interfaces TypeScript
-│   │   │   └── services/       # Serviços (API, IA)
-│   │   ├── features/
-│   │   │   ├── dashboard/      # Painel principal
-│   │   │   ├── mapa/           # Mapa interativo
-│   │   │   ├── assistente/     # Chat com Gemma AI
-│   │   │   ├── relatorios/     # Relatórios automáticos
-│   │   │   ├── alertas/        # Sistema de alertas
-│   │   │   └── configuracoes/  # Configurações
-│   │   ├── app.routes.ts       # Rotas da aplicação
-│   │   └── app.component.ts    # Componente raiz
-│   ├── styles.css              # Design system global
-│   └── index.html              # Ponto de entrada
-└── package.json
+ecoguys/
+├── backend/                      # Pasta reservada para a API backend (Spring Boot / Node.js)
+│   └── LEIAME.md                 # Guia de integração para o backend
+├── docs/
+│   └── concept.md                # Especificação conceitual do sistema
+├── frontend/                     # Aplicação Frontend em Angular 18
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── core/
+│   │   │   │   ├── components/   # Sidebar (menu) e Header (busca/perfil)
+│   │   │   │   ├── models/       # environment.model.ts (interfaces TypeScript)
+│   │   │   │   └── services/     # Services: Environment, Gemma AI e Map Service
+│   │   │   ├── features/
+│   │   │   │   ├── alertas/      # Sistema de alertas e parâmetros
+│   │   │   │   ├── assistente/   # Chat em linguagem natural com a IA Gemma
+│   │   │   │   ├── configuracoes/# Gestão de fontes e preferências
+│   │   │   │   ├── dashboard/    # Painel dos 9 indicadores + destaques
+│   │   │   │   ├── mapa/         # Mapa interativo com drill-down e painel lateral
+│   │   │   │   └── relatorios/   # Relatórios ambientais em 5 seções
+│   │   │   ├── app.component.ts  # Componente raiz
+│   │   │   ├── app.config.ts     # Configuração da aplicação
+│   │   │   └── app.routes.ts     # Rotas lazy-loaded
+│   │   ├── styles.css            # Design System (Glassmorphism + variáveis CSS)
+│   │   └── index.html            # Ponto de entrada HTML (CDNs)
+│   └── package.json
+├── LEIAME.md                     # Resumo geral do projeto em português
+└── README.md                     # Documentação principal do repositório
 ```
 
-## 🔌 Integração com Backend
+---
 
-O frontend está preparado para receber dados de APIs reais. Os services já possuem a estrutura de **Signals** do Angular para gerenciamento de estado reativo.
+## 🔌 Preparação para Integração com Backend
 
-### Interfaces principais (`environment.model.ts`):
+O frontend utiliza **Angular Signals** (`signal()`) para gerenciar o estado reativo. Todos os componentes consomem dados por meio dos seguintes serviços:
 
-- `EnvironmentalIndicator` — 9 indicadores ambientais
-- `EnvironmentalAlert` — Alertas com severidade
-- `ChatMessage` — Mensagens do chat com a IA
-- `AutomaticReport` — Relatórios gerados automaticamente
+### Services Principais:
+1. `EnvironmentService` — Gerencia os 9 indicadores ambientais e a lista de alertas.
+2. `GemmaAiService` — Gerencia o histórico de chat e geração de relatórios da IA Gemma.
+3. `MapService` — Gerencia as malhas geográficas em GeoJSON (API do IBGE v3) e cache local.
 
-### Services para conectar ao backend:
+### Interfaces Principais (`environment.model.ts`):
+- `EnvironmentalIndicator` — Modelo para os 9 indicadores ambientais.
+- `EnvironmentalAlert` — Modelo de alertas e níveis de severidade.
+- `ChatMessage` — Modelo das mensagens trocadas com o assistente.
+- `AutomaticReport` — Modelo de relatórios divididos em 5 seções.
+- `MapNavigationState` — Modelo para controle do nível do mapa (`country` | `state` | `municipality`).
 
-- `EnvironmentService` — Indicadores e alertas
-- `GemmaAiService` — Chat e relatórios da IA
+---
 
 ## 📄 Licença
 
-Projeto acadêmico — IFAC.
+Projeto desenvolvido para fins acadêmicos — IFAC.
