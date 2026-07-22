@@ -104,8 +104,8 @@ declare const Chart: any;
         <div class="chart-panel glass-panel mt-4">
           <div class="panel-header mb-3">
             <div>
-              <h3><i data-lucide="bar-chart-3" class="inline-icon"></i> Environmental Analytics</h3>
-              <p class="panel-subtitle">Análise histórica mensal com barras arredondadas e curva de tendência</p>
+              <h3><i data-lucide="bar-chart-3" class="inline-icon"></i> Previsão Climática (Próximos 5 Dias)</h3>
+              <p class="panel-subtitle">Variação de temperatura e umidade para os próximos dias (intervalos de 3h)</p>
             </div>
           </div>
           <div class="chart-container-box">

@@ -145,3 +145,86 @@ async def chat_with_ai(request: ChatRequest):
 @app.get("/api/health")
 async def health_check():
     return {"status": "ok", "message": "Backend FastAPI está rodando"}
+
+@app.get("/api/v1/indicators")
+async def get_indicators(city: str):
+    parts = city.split('-')
+    cidade = parts[0].strip()
+    uf = parts[1].strip() if len(parts) > 1 else ""
+    try:
+        dados = obter_clima_atual(cidade, uf)
+        temp = dados["main"]["temp"]
+        humidity = dados["main"]["humidity"]
+        rain = dados.get("rain", {}).get("1h", 0.0)
+        wind = dados["wind"]["speed"] * 3.6
+        visibilidade = dados.get("visibility", 10000)
+        aqi_value = 45 if visibilidade > 8000 else (120 if visibilidade < 4000 else 80)
+        feels_like = dados["main"]["feels_like"]
+        pressure = dados["main"]["pressure"]
+        clouds = dados.get("clouds", {}).get("all", 0)
+        vis_km = visibilidade / 1000.0
+
+        return [
+            { "id": '1', "name": 'Temperatura', "value": f"{temp:.1f}", "unit": '°C', "status": 'info', "icon": 'thermometer', "category": 'temperature' },
+            { "id": '2', "name": 'Umidade Relativa', "value": f"{humidity}", "unit": '%', "status": 'info', "icon": 'droplets', "category": 'humidity' },
+            { "id": '3', "name": 'Precipitação (1h)', "value": f"{rain:.1f}", "unit": 'mm', "status": 'info', "icon": 'cloud-rain', "category": 'rain' },
+            { "id": '4', "name": 'Vento', "value": f"{wind:.1f}", "unit": 'km/h', "status": 'info', "icon": 'wind', "category": 'wind' },
+            { "id": '5', "name": 'Qualidade do Ar (Est.)', "value": f"{aqi_value}", "unit": 'AQI', "status": 'warning' if aqi_value > 100 else 'info', "icon": 'activity', "category": 'aqi' },
+            { "id": '6', "name": 'Sensação Térmica', "value": f"{feels_like:.1f}", "unit": '°C', "status": 'info', "icon": 'sun-dim', "category": 'uv' },
+            { "id": '7', "name": 'Pressão Atmosférica', "value": f"{pressure}", "unit": 'hPa', "status": 'info', "icon": 'gauge', "category": 'river' },
+            { "id": '8', "name": 'Nebulosidade', "value": f"{clouds}", "unit": '%', "status": 'info', "icon": 'cloud', "category": 'fire' },
+            { "id": '9', "name": 'Visibilidade', "value": f"{vis_km:.1f}", "unit": 'km', "status": 'info', "icon": 'eye', "category": 'vegetation' }
+        ]
+    except Exception:
+        return []
+
+@app.get("/api/v1/alerts")
+async def get_alerts(city: str):
+    parts = city.split('-')
+    cidade = parts[0].strip()
+    uf = parts[1].strip() if len(parts) > 1 else ""
+    try:
+        dados = obter_clima_atual(cidade, uf)
+        temp = dados["main"]["temp"]
+        humidity = dados["main"]["humidity"]
+        wind = dados["wind"]["speed"]
+        alertas = []
+        if humidity < 30 and temp > 30:
+            alertas.append({
+                "id": "1", "title": "Alerta de Queimadas", 
+                "description": f"Clima seco ({humidity}%) e quente ({temp}°C).", 
+                "severity": "critical" if wind > 5 else "warning", "timestamp": ""
+            })
+        if humidity < 20:
+            alertas.append({
+                "id": "2", "title": "Emergência de Saúde", 
+                "description": f"Umidade criticamente baixa ({humidity}%).", "severity": "critical", "timestamp": ""
+            })
+        elif humidity < 30:
+            alertas.append({
+                "id": "2", "title": "Atenção Saúde", 
+                "description": f"Umidade abaixo do recomendado ({humidity}%).", "severity": "warning", "timestamp": ""
+            })
+        return alertas
+    except Exception:
+        return []
+
+@app.get("/api/v1/charts/historical")
+async def get_charts(city: str):
+    parts = city.split('-')
+    cidade = parts[0].strip()
+    uf = parts[1].strip() if len(parts) > 1 else ""
+    try:
+        previsao = obter_previsao(cidade, uf)
+        lista = previsao.get("list", [])[:12]
+        labels = []
+        lineData = []
+        barData = []
+        for item in lista:
+            hora = item["dt_txt"].split(" ")[1][:5]
+            labels.append(hora)
+            lineData.append(round(item["main"]["temp"], 1))
+            barData.append(item["main"]["humidity"])
+        return { "labels": labels, "lineData": lineData, "barData": barData }
+    except Exception:
+        return { "labels": ['Erro'], "lineData": [0], "barData": [0] }
