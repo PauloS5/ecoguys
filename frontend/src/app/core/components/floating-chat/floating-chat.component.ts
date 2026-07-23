@@ -59,7 +59,7 @@ declare const lucide: any;
               <img src="/icon.svg" alt="Gemma Logo" class="avatar-logo-img">
             </div>
             <div class="msg-bubble">
-              <p>{{ msg.text }}</p>
+              <p [innerHTML]="parseMarkdown(msg.text)"></p>
               <span class="msg-time">{{ msg.timestamp | date:'HH:mm' }}</span>
             </div>
           </div>
@@ -424,5 +424,16 @@ export class FloatingChatComponent implements AfterViewChecked {
         lucide.createIcons();
       }
     }, 100);
+  }
+
+  parseMarkdown(text: string): string {
+    if (!text) return '';
+    let html = text.replace(/^### (.*$)/gim, '<h4>$1</h4>');
+    html = html.replace(/^## (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^# (.*$)/gim, '<h2>$1</h2>');
+    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+    html = html.replace(/\n/gim, '<br>');
+    return html;
   }
 }

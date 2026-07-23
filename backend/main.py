@@ -133,8 +133,7 @@ async def chat_with_ai(request: ChatRequest):
                     "3. Conforto Térmico:\n"
                     "   - NORMAL: Sem calor extremo ou umidade extrema combinados.\n"
                     "   - EXAUSTÃO TÉRMICA: Temperatura > 30°C combinada com Umidade > 70%.\n"
-                    "4. Tempestades: Observe a probabilidade de chuva ('pop') e ventos na previsão.\n\n"
-                    "Instrução: Seja conversacional e amigável. Use os dados exatos (abaixo) para basear sua resposta, mas fale como um humano prestativo. A temperatura já está convertida para Celsius (°C).\n"
+                    "Instrução: Você receberá abaixo os dados climáticos atuais da região do usuário. IMPORTANTE: Use esses dados APENAS se o usuário fizer alguma pergunta relacionada ao clima, meio ambiente ou riscos. Se o usuário estiver apenas conversando livremente (ex: dizendo 'Olá', 'Tudo bem?'), responda APENAS à conversa dele e IGNORE os dados climáticos. Seja sempre amigável e natural. A temperatura já está em Celsius (°C).\n"
                 )
 
                 context_prompt += regras_analise + (
