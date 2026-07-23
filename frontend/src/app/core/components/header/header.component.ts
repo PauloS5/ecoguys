@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -153,6 +153,30 @@ export class HeaderComponent implements OnInit {
   loadingStates = true;
   loadingCities = false;
 
+  constructor() {
+    effect(() => {
+      const globalCity = this.envService.selectedCity();
+      if (globalCity) {
+        const parts = globalCity.split(' - ');
+        if (parts.length === 2) {
+          const [city, state] = parts;
+          let changed = false;
+          
+          if (this.selectedStateSigla !== state) {
+            this.selectedStateSigla = state;
+            this.fetchCities(state, false);
+            changed = true;
+          }
+          
+          if (this.selectedCityName !== city) {
+            this.selectedCityName = city;
+            changed = true;
+          }
+        }
+      }
+    }, { allowSignalWrites: true });
+  }
+
   ngOnInit(): void {
     this.fetchStates();
   }
@@ -189,7 +213,7 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  fetchCities(uf: string): void {
+  fetchCities(uf: string, notifyAfter: boolean = true): void {
     this.loadingCities = true;
     this.http.get<CityIBGE[]>(`${this.ibgeUrl}/estados/${uf}/municipios?orderBy=nome`)
       .pipe(
@@ -205,6 +229,7 @@ export class HeaderComponent implements OnInit {
         this.loadingCities = false;
         if (cities.length > 0) {
           const cityExists = cities.find(c => c.nome === this.selectedCityName);
+          let defaulted = false;
           
           if (!cityExists) {
             // Se for SP, tenta achar a capital São Paulo, senão pega a primeira
@@ -214,9 +239,12 @@ export class HeaderComponent implements OnInit {
             } else {
               this.selectedCityName = cities[0].nome;
             }
+            defaulted = true;
           }
           
-          this.notifyEnvironmentService();
+          if (notifyAfter || defaulted) {
+            this.notifyEnvironmentService();
+          }
         }
       });
   }
