@@ -72,7 +72,8 @@ interface CityIBGE {
 
         <div class="mt-4 display-flex justify-end">
           <button (click)="generateReportWithAI()" [disabled]="gemmaService.isGeneratingReport() || loadingCities" class="btn btn-primary">
-            <i [attr.data-lucide]="gemmaService.isGeneratingReport() ? 'loader' : 'sparkles'" [class.spin]="gemmaService.isGeneratingReport()"></i>
+            <i *ngIf="gemmaService.isGeneratingReport()" data-lucide="loader" class="spin"></i>
+            <i *ngIf="!gemmaService.isGeneratingReport()" data-lucide="sparkles"></i>
             <span>{{ gemmaService.isGeneratingReport() ? 'Gerando Relatório com IA...' : 'Gerar Relatório com IA' }}</span>
           </button>
         </div>
@@ -336,6 +337,11 @@ export class ReportsComponent implements OnInit {
     if (!this.selectedCity || !this.selectedStateSigla) return;
     this.copied = false;
     this.gemmaService.generateReport(this.selectedCity, this.selectedStateSigla, this.selectedPeriod);
+    setTimeout(() => {
+      if (typeof window !== 'undefined' && (window as any).lucide) {
+        (window as any).lucide.createIcons();
+      }
+    }, 50);
   }
 
   copyReport(): void {
