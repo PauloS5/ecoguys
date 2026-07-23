@@ -11,7 +11,10 @@ export class GemmaAiService {
   private http = inject(HttpClient);
   private envService = inject(EnvironmentService);
   // URL correta do nosso backend FastAPI
-  private apiUrl = 'http://127.0.0.1:8000/api';
+  private get apiUrl(): string {
+    const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+    return `http://${host}:8000/api`;
+  }
 
   chatHistory = signal<ChatMessage[]>([
     {
