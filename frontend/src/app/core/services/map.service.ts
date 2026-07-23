@@ -39,7 +39,7 @@ export class MapService {
 
     this.isLoading.set(true);
     try {
-      const url = `${this.IBGE_BASE}/paises/BR?formato=application/vnd.geo+json&intrarregiao=UF&qualidade=2`;
+      const url = `${this.IBGE_BASE}/paises/BR?formato=application/vnd.geo+json&intrarregiao=UF`;
       const response = await fetch(url);
       if (!response.ok) throw new Error('Erro ao carregar estados');
       const data = await response.json();
@@ -58,7 +58,7 @@ export class MapService {
 
     this.isLoading.set(true);
     try {
-      const url = `${this.IBGE_BASE}/estados/${codUF}?formato=application/vnd.geo+json&intrarregiao=municipio&qualidade=2`;
+      const url = `${this.IBGE_BASE}/estados/${codUF}?formato=application/vnd.geo+json&intrarregiao=municipio`;
       const response = await fetch(url);
       if (!response.ok) throw new Error('Erro ao carregar municípios');
       const data = await response.json();
