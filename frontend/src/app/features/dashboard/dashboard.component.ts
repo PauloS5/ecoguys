@@ -264,7 +264,10 @@ declare const Chart: any;
 export class DashboardComponent implements AfterViewInit, OnDestroy {
   envService = inject(EnvironmentService);
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8000/api/v1';
+  private get apiUrl(): string {
+    const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+    return `http://${host}:8000/api/v1`;
+  }
 
   isLoading = true;
   private mainChartInstance: any;

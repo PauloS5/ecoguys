@@ -339,7 +339,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   envService = inject(EnvironmentService);
   private ngZone = inject(NgZone);
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8000/api/v1';
+  private get apiUrl(): string {
+    const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+    return `http://${host}:8000/api/v1`;
+  }
 
   private map: any;
   private tileLayer: any;

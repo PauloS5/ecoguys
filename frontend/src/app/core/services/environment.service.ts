@@ -8,7 +8,10 @@ import { catchError, of } from 'rxjs';
 })
 export class EnvironmentService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8000/api/v1';
+  private get apiUrl(): string {
+    const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+    return `http://${host}:8000/api/v1`;
+  }
 
   selectedCity = signal<string>('São Paulo - SP');
   mobileMenuOpen = signal<boolean>(false);
