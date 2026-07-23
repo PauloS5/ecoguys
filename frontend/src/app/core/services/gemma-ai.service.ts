@@ -38,6 +38,54 @@ export class GemmaAiService {
     'Faça um resumo ambiental desta semana.'
   ];
 
+  generateReport(cidade: string, uf: string, period: string): void {
+    this.isGeneratingReport.set(true);
+    
+    const promptText = `Gere um relatório ambiental analítico e completo em texto para o município de ${cidade} - ${uf}, referente ao período de ${period}. Estruture o texto com: 
+1. RESUMO DAS CONDIÇÕES CLIMÁTICAS
+2. ANÁLISE DE TEMPERATURA E UMIDADE RELATIVA
+3. AVALIAÇÃO DE RISCOS AMBIENTAIS E QUEIMADAS
+4. RECOMENDAÇÕES PREVENTIVAS DA IA GEMMA`;
+
+    this.http.post<{ response: string }>(`${this.apiUrl}/chat`, {
+      prompt: promptText,
+      system_prompt: "Você é um redator técnico e objetivo. Retorne APENAS o texto do relatório seguindo a estrutura solicitada. NUNCA adicione saudações como 'Olá' ou comentários extras.",
+      cidade: cidade,
+      uf: uf
+    })
+    .pipe(
+      catchError(() => {
+        return of({
+          response: `RELATÓRIO AMBIENTAL DE DEMONSTRAÇÃO\nMunicípio: ${cidade} - ${uf}\nPeríodo: ${period}\n\n1. RESUMO DAS CONDIÇÕES CLIMÁTICAS\nA região de ${cidade} - ${uf} registrou estabilidade climática geral.\n\n2. ANÁLISE DE TEMPERATURA E UMIDADE\nOscilações térmicas típicas. A umidade oscilou entre 55% e 75%.\n\n3. AVALIAÇÃO DE RISCOS E QUEIMADAS\nÍndices de queimadas em nível de atenção baixa a moderada.\n\n4. RECOMENDAÇÕES PREVENTIVAS DA IA GEMMA\nManter monitoramento contínuo.`
+        });
+      })
+    )
+    .subscribe(res => {
+      this.currentReportText.set(res.response);
+      this.currentReportTextHtml.set(this.parseMarkdown(res.response));
+      this.currentReportDate.set(new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+      this.isGeneratingReport.set(false);
+      
+      // Update icons after a short delay since HTML is injected dynamically
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && (window as any).lucide) {
+          (window as any).lucide.createIcons();
+        }
+      }, 100);
+    });
+  }
+
+  private parseMarkdown(text: string): string {
+    if (!text) return '';
+    let html = text.replace(/^### (.*$)/gim, '<h4>$1</h4>');
+    html = html.replace(/^## (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^# (.*$)/gim, '<h2>$1</h2>');
+    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+    html = html.replace(/\n/gim, '<br>');
+    return html;
+  }
+
   askGemma(question: string): void {
     if (!question.trim()) return;
 

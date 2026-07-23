@@ -333,47 +333,8 @@ export class ReportsComponent implements OnInit {
 
   generateReportWithAI(): void {
     if (!this.selectedCity || !this.selectedStateSigla) return;
-
-    const promptText = `Gere um relatório ambiental analítico e completo em texto para o município de ${this.selectedCity} - ${this.selectedStateSigla}, referente ao período de ${this.selectedPeriod}. Estruture o texto com: 
-1. RESUMO DAS CONDIÇÕES CLIMÁTICAS
-2. ANÁLISE DE TEMPERATURA E UMIDADE RELATIVA
-3. AVALIAÇÃO DE RISCOS AMBIENTAIS E QUEIMADAS
-4. RECOMENDAÇÕES PREVENTIVAS DA IA GEMMA`;
-
-    this.gemmaService.isGeneratingReport.set(true);
     this.copied = false;
-
-    this.http.post<{ response: string }>(`${this.apiUrl}/chat`, {
-      prompt: promptText,
-      system_prompt: "Você é um redator técnico e objetivo. Retorne APENAS o texto do relatório seguindo a estrutura solicitada. NUNCA adicione saudações como 'Olá' ou comentários extras.",
-      cidade: this.selectedCity,
-      uf: this.selectedStateSigla
-    })
-    .pipe(
-      catchError(() => {
-        return of({
-          response: `RELATÓRIO AMBIENTAL DE DEMONSTRAÇÃO\nMunicípio: ${this.selectedCity} - ${this.selectedStateSigla}\nPeríodo: ${this.selectedPeriod}\n\n1. RESUMO DAS CONDIÇÕES CLIMÁTICAS\nA região de ${this.selectedCity} - ${this.selectedStateSigla} registrou estabilidade climática geral com temperaturas médias de 31.5°C e umidade relativa média de 65% no período analisado.\n\n2. ANÁLISE DE TEMPERATURA E UMIDADE\nObservam-se oscilações térmicas típicas durante a tarde, com picos de calor atingindo 34°C. A umidade oscilou entre 55% e 75%.\n\n3. AVALIAÇÃO DE RISCOS E QUEIMADAS\nOs índices de queimadas permanecem em nível de atenção baixa a moderada nas áreas rurais periféricas.\n\n4. RECOMENDAÇÕES PREVENTIVAS DA IA GEMMA\nRecomenda-se manter o monitoramento contínuo das fontes de água e evitar queimadas descontroladas.`
-        });
-      })
-    )
-    .subscribe(res => {
-      this.gemmaService.currentReportText.set(res.response);
-      this.gemmaService.currentReportTextHtml.set(this.parseMarkdown(res.response));
-      this.gemmaService.currentReportDate.set(new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
-      this.gemmaService.isGeneratingReport.set(false);
-      this.refreshIcons();
-    });
-  }
-
-  private parseMarkdown(text: string): string {
-    if (!text) return '';
-    let html = text.replace(/^### (.*$)/gim, '<h4>$1</h4>');
-    html = html.replace(/^## (.*$)/gim, '<h3>$1</h3>');
-    html = html.replace(/^# (.*$)/gim, '<h2>$1</h2>');
-    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
-    html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
-    html = html.replace(/\n/gim, '<br>');
-    return html;
+    this.gemmaService.generateReport(this.selectedCity, this.selectedStateSigla, this.selectedPeriod);
   }
 
   copyReport(): void {
