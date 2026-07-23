@@ -55,9 +55,10 @@ interface CityIBGE {
       </div>
 
       <div class="header-right">
-        <button (click)="refreshData()" class="btn btn-secondary btn-sm" title="Carregar / Atualizar dados">
-          <i data-lucide="refresh-cw"></i>
-          <span class="hide-mobile">Atualizar Dados</span>
+        <button (click)="refreshData()" [disabled]="isRefreshing" class="btn btn-secondary btn-sm" title="Carregar / Atualizar dados">
+          <span *ngIf="!isRefreshing"><i data-lucide="refresh-cw"></i></span>
+          <span *ngIf="isRefreshing"><i data-lucide="loader" class="spin"></i></span>
+          <span class="hide-mobile">{{ isRefreshing ? 'Atualizando...' : 'Atualizar Dados' }}</span>
         </button>
       </div>
     </header>
@@ -152,6 +153,7 @@ export class HeaderComponent implements OnInit {
 
   loadingStates = true;
   loadingCities = false;
+  isRefreshing = false;
 
   constructor() {
     effect(() => {
@@ -263,6 +265,17 @@ export class HeaderComponent implements OnInit {
   }
 
   refreshData(): void {
+    this.isRefreshing = true;
     this.notifyEnvironmentService();
+    
+    // Feedback visual para o usuário
+    setTimeout(() => {
+      this.isRefreshing = false;
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && (window as any).lucide) {
+          (window as any).lucide.createIcons();
+        }
+      }, 50);
+    }, 800);
   }
 }
