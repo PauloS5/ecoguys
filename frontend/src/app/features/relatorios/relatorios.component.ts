@@ -70,16 +70,16 @@ interface CityIBGE {
         </div>
 
         <div class="mt-4 display-flex justify-end">
-          <button (click)="generateReportWithAI()" [disabled]="isGenerating || loadingCities" class="btn btn-primary">
-            <i [attr.data-lucide]="isGenerating ? 'loader' : 'sparkles'" [class.spin]="isGenerating"></i>
-            <span>{{ isGenerating ? 'Gerando Relatório com IA...' : 'Gerar Relatório com IA' }}</span>
+          <button (click)="generateReportWithAI()" [disabled]="gemmaService.isGeneratingReport() || loadingCities" class="btn btn-primary">
+            <i [attr.data-lucide]="gemmaService.isGeneratingReport() ? 'loader' : 'sparkles'" [class.spin]="gemmaService.isGeneratingReport()"></i>
+            <span>{{ gemmaService.isGeneratingReport() ? 'Gerando Relatório com IA...' : 'Gerar Relatório com IA' }}</span>
           </button>
         </div>
 
       </div>
 
       <!-- ================= ÁREA DE EXIBIÇÃO DO RELATÓRIO EM TEXTO ================= -->
-      <div *ngIf="isGenerating" class="report-result-card glass-panel mt-4 loading-state">
+      <div *ngIf="gemmaService.isGeneratingReport()" class="report-result-card glass-panel mt-4 loading-state">
         <div class="ai-loading-box">
           <div class="sparkle-pulse-avatar">
             <img src="/icon.svg" alt="IA Logo" class="ai-pulse-icon">
@@ -89,17 +89,17 @@ interface CityIBGE {
         </div>
       </div>
 
-      <div *ngIf="!isGenerating && reportText" class="report-result-card glass-panel mt-4">
+      <div *ngIf="!gemmaService.isGeneratingReport() && gemmaService.currentReportText()" class="report-result-card glass-panel mt-4">
         <div class="report-result-header">
           <div class="title-with-badge">
             <h3><i data-lucide="file-check" class="icon-green"></i> Relatório Ambiental — {{ selectedCity }} ({{ selectedStateSigla }})</h3>
             <span class="badge-ai">Gerado por IA Gemma</span>
           </div>
           <div class="report-actions">
-            <button (click)="copyText()" class="btn btn-glass btn-sm" title="Copiar texto do relatório">
+            <button (click)="copyReport()" class="btn btn-glass btn-sm" title="Copiar texto do relatório">
               <i data-lucide="copy"></i> {{ copied ? 'Copiado!' : 'Copiar Texto' }}
             </button>
-            <button (click)="downloadTxt()" class="btn btn-primary btn-sm" title="Baixar relatório em arquivo de texto">
+            <button (click)="downloadReport()" class="btn btn-primary btn-sm" title="Baixar relatório em arquivo de texto">
               <i data-lucide="download"></i> Baixar (.txt)
             </button>
           </div>
@@ -108,11 +108,11 @@ interface CityIBGE {
         <div class="report-meta-bar my-3">
           <span>📍 <strong>Local:</strong> {{ selectedCity }} - {{ selectedStateSigla }}</span>
           <span>📅 <strong>Período:</strong> {{ selectedPeriod }}</span>
-          <span>🕒 <strong>Data de Emissão:</strong> {{ generatedDate }}</span>
+          <span>🕒 <strong>Data de Emissão:</strong> {{ gemmaService.currentReportDate() }}</span>
         </div>
 
         <div class="report-text-content">
-          <div class="formatted-text" [innerHTML]="reportTextHtml"></div>
+          <div class="formatted-text" [innerHTML]="gemmaService.currentReportTextHtml()"></div>
         </div>
       </div>
 
@@ -249,12 +249,10 @@ export class ReportsComponent implements OnInit {
 
   loadingStates = true;
   loadingCities = false;
-  isGenerating = false;
-
-  reportText = '';
-  reportTextHtml = '';
-  generatedDate = '';
+  isGenerating = false; // local UI lock flag, optional, but we can bind to service
   copied = false;
+
+  gemmaService = inject(GemmaAiService);
 
   constructor() {
     effect(() => {
@@ -336,17 +334,18 @@ export class ReportsComponent implements OnInit {
   generateReportWithAI(): void {
     if (!this.selectedCity || !this.selectedStateSigla) return;
 
-    this.isGenerating = true;
-    this.copied = false;
-
     const promptText = `Gere um relatório ambiental analítico e completo em texto para o município de ${this.selectedCity} - ${this.selectedStateSigla}, referente ao período de ${this.selectedPeriod}. Estruture o texto com: 
 1. RESUMO DAS CONDIÇÕES CLIMÁTICAS
 2. ANÁLISE DE TEMPERATURA E UMIDADE RELATIVA
 3. AVALIAÇÃO DE RISCOS AMBIENTAIS E QUEIMADAS
 4. RECOMENDAÇÕES PREVENTIVAS DA IA GEMMA`;
 
+    this.gemmaService.isGeneratingReport.set(true);
+    this.copied = false;
+
     this.http.post<{ response: string }>(`${this.apiUrl}/chat`, {
       prompt: promptText,
+      system_prompt: "Você é um redator técnico e objetivo. Retorne APENAS o texto do relatório seguindo a estrutura solicitada. NUNCA adicione saudações como 'Olá' ou comentários extras.",
       cidade: this.selectedCity,
       uf: this.selectedStateSigla
     })
@@ -358,10 +357,10 @@ export class ReportsComponent implements OnInit {
       })
     )
     .subscribe(res => {
-      this.reportText = res.response;
-      this.reportTextHtml = this.parseMarkdown(res.response);
-      this.generatedDate = new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      this.isGenerating = false;
+      this.gemmaService.currentReportText.set(res.response);
+      this.gemmaService.currentReportTextHtml.set(this.parseMarkdown(res.response));
+      this.gemmaService.currentReportDate.set(new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+      this.gemmaService.isGeneratingReport.set(false);
       this.refreshIcons();
     });
   }
@@ -377,22 +376,26 @@ export class ReportsComponent implements OnInit {
     return html;
   }
 
-  copyText(): void {
-    if (!this.reportText) return;
-    navigator.clipboard.writeText(this.reportText);
-    this.copied = true;
-    setTimeout(() => this.copied = false, 2500);
+  copyReport(): void {
+    const textToCopy = this.gemmaService.currentReportText();
+    if (textToCopy) {
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        this.copied = true;
+        setTimeout(() => this.copied = false, 3000);
+      });
+    }
   }
 
-  downloadTxt(): void {
-    if (!this.reportText) return;
-    const element = document.createElement('a');
-    const file = new Blob([this.reportText], { type: 'text/plain;charset=utf-8' });
-    element.href = URL.createObjectURL(file);
-    element.download = `Relatorio_Ambiental_${this.selectedCity.replace(/\s+/g, '_')}_${this.selectedStateSigla}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+  downloadReport(): void {
+    const text = this.gemmaService.currentReportText();
+    if (!text) return;
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `relatorio-ambiental-${this.selectedCity}.txt`;
+    link.click();
+    window.URL.revokeObjectURL(url);
   }
 
   private refreshIcons(): void {

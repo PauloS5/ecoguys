@@ -25,6 +25,12 @@ export class GemmaAiService {
   reportsHistory = signal<AutomaticReport[]>([]);
   isTyping = signal<boolean>(false);
 
+  // Estado do Gerador de Relatórios (persistência entre rotas)
+  currentReportText = signal<string>('');
+  currentReportTextHtml = signal<string>('');
+  currentReportDate = signal<string>('');
+  isGeneratingReport = signal<boolean>(false);
+
   defaultPrompts = [
     'Como está a qualidade do ar hoje?',
     'Existe risco de queimadas nesta região?',
