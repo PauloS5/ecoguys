@@ -41,7 +41,7 @@ import { ChatMessage } from '../../core/models/environment.model';
             </div>
             <div class="msg-bubble-wrapper">
               <div class="msg-bubble">
-                <p>{{ msg.text }}</p>
+                <p [innerHTML]="parseMarkdown(msg.text)"></p>
               </div>
               <span class="msg-time">{{ msg.timestamp | date:'HH:mm' }}</span>
             </div>
@@ -335,5 +335,16 @@ export class AssistantComponent {
         timestamp: new Date()
       }
     ]);
+  }
+
+  parseMarkdown(text: string): string {
+    if (!text) return '';
+    let html = text.replace(/^### (.*$)/gim, '<h4>$1</h4>');
+    html = html.replace(/^## (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^# (.*$)/gim, '<h2>$1</h2>');
+    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+    html = html.replace(/\n/gim, '<br>');
+    return html;
   }
 }
