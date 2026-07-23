@@ -96,7 +96,7 @@ import json
 
 class ChatRequest(BaseModel):
     prompt: str
-    system_prompt: str = "Você é um assistente direto, focado e responde de forma objetiva."
+    system_prompt: str = "Você é a Gemma, uma assistente virtual amigável, educada e especialista em meio ambiente. Você sempre responde de forma humana e calorosa, mas usa os dados fornecidos para dar análises precisas."
     temperature: float = 0.7
     max_tokens: int = 800
     cidade: str | None = "São Paulo" # Padrão
@@ -120,8 +120,8 @@ async def chat_with_ai(request: ChatRequest):
                     previsao["list"] = previsao["list"][:3]
                 
                 regras_analise = (
-                    "\n\nDIRETRIZES RIGOROSAS DE ANÁLISE AMBIENTAL:\n"
-                    "Regra de Ouro: NUNCA invente riscos que não existem. Se as condições forem normais, afirme claramente que o risco é BAIXO ou a situação é SEGURA.\n\n"
+                    "\n\nDIRETRIZES DE ANÁLISE AMBIENTAL:\n"
+                    "Regra de Ouro: NUNCA invente riscos que não existem. Se as condições forem normais, afirme que a situação é segura de forma amigável.\n\n"
                     "1. Risco de Queimadas:\n"
                     "   - BAIXO/NENHUM: Se a umidade for > 30% ou a temperatura for < 30°C.\n"
                     "   - ALTO RISCO: APENAS SE (Umidade < 30% E Temperatura > 30°C).\n"
@@ -133,8 +133,8 @@ async def chat_with_ai(request: ChatRequest):
                     "3. Conforto Térmico:\n"
                     "   - NORMAL: Sem calor extremo ou umidade extrema combinados.\n"
                     "   - EXAUSTÃO TÉRMICA: Temperatura > 30°C combinada com Umidade > 70%.\n"
-                    "4. Tempestades: Observe a probabilidade de chuva ('pop') e ventos na previsão. Ventos fortes podem indicar tempestades iminentes.\n\n"
-                    "Baseie sua resposta EXCLUSIVAMENTE nos dados exatos fornecidos abaixo. A temperatura já está convertida para Celsius (°C).\n"
+                    "4. Tempestades: Observe a probabilidade de chuva ('pop') e ventos na previsão.\n\n"
+                    "Instrução: Seja conversacional e amigável. Use os dados exatos (abaixo) para basear sua resposta, mas fale como um humano prestativo. A temperatura já está convertida para Celsius (°C).\n"
                 )
 
                 context_prompt += regras_analise + (
@@ -147,7 +147,7 @@ async def chat_with_ai(request: ChatRequest):
                 print(f"Erro ao buscar dados de clima: {e}")
 
         completion = client.chat.completions.create(
-            model="google/gemma-4-e4b", 
+            model="google/gemma-3-4b", 
             messages=[
                 {"role": "system", "content": context_prompt},
                 {"role": "user", "content": request.prompt}
