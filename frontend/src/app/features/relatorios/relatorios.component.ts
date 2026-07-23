@@ -72,8 +72,8 @@ interface CityIBGE {
 
         <div class="mt-4 display-flex justify-end">
           <button (click)="generateReportWithAI()" [disabled]="gemmaService.isGeneratingReport() || loadingCities" class="btn btn-primary">
-            <i *ngIf="gemmaService.isGeneratingReport()" data-lucide="loader" class="spin"></i>
-            <i *ngIf="!gemmaService.isGeneratingReport()" data-lucide="sparkles"></i>
+            <span *ngIf="gemmaService.isGeneratingReport()"><i data-lucide="loader" class="spin"></i></span>
+            <span *ngIf="!gemmaService.isGeneratingReport()"><i data-lucide="sparkles"></i></span>
             <span>{{ gemmaService.isGeneratingReport() ? 'Gerando Relatório com IA...' : 'Gerar Relatório com IA' }}</span>
           </button>
         </div>
