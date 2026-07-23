@@ -86,9 +86,9 @@ app.add_middleware(
     allow_headers=["*"],  # Permite todos os cabeçalhos
 )
 
-# Inicializa o cliente da OpenAI apontando para o servidor local exposto no Ngrok
+# Inicializa o cliente da OpenAI apontando para o servidor local do LM Studio
 client = OpenAI(
-    base_url="https://clamshell-rescuer-creasing.ngrok-free.dev/v1", 
+    base_url="http://127.0.0.1:1234/v1", 
     api_key="lm-studio"
 )
 
@@ -147,7 +147,7 @@ async def chat_with_ai(request: ChatRequest):
                 print(f"Erro ao buscar dados de clima: {e}")
 
         completion = client.chat.completions.create(
-            model="google/gemma-3-4b", 
+            model="google/gemma-4-e4b", 
             messages=[
                 {"role": "system", "content": context_prompt},
                 {"role": "user", "content": request.prompt}
