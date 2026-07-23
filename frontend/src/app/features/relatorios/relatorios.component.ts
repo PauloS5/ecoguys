@@ -1,8 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
+import { EnvironmentService } from '../../core/services/environment.service';
 
 declare const lucide: any;
 
@@ -111,7 +112,7 @@ interface CityIBGE {
         </div>
 
         <div class="report-text-content">
-          <pre class="formatted-text">{{ reportText }}</pre>
+          <div class="formatted-text" [innerHTML]="reportTextHtml"></div>
         </div>
       </div>
 
@@ -235,6 +236,7 @@ interface CityIBGE {
 })
 export class ReportsComponent implements OnInit {
   private http = inject(HttpClient);
+  private envService = inject(EnvironmentService);
   private apiUrl = 'http://127.0.0.1:8000/api';
   private ibgeUrl = 'https://servicodados.ibge.gov.br/api/v1/localidades';
 
@@ -250,8 +252,22 @@ export class ReportsComponent implements OnInit {
   isGenerating = false;
 
   reportText = '';
+  reportTextHtml = '';
   generatedDate = '';
   copied = false;
+
+  constructor() {
+    effect(() => {
+      const globalCity = this.envService.selectedCity();
+      if (globalCity) {
+        const parts = globalCity.split('-');
+        if (parts.length >= 2) {
+          this.selectedCity = parts[0].trim();
+          this.selectedStateSigla = parts[1].trim();
+        }
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.fetchStates();
@@ -335,10 +351,22 @@ export class ReportsComponent implements OnInit {
     )
     .subscribe(res => {
       this.reportText = res.response;
+      this.reportTextHtml = this.parseMarkdown(res.response);
       this.generatedDate = new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
       this.isGenerating = false;
       this.refreshIcons();
     });
+  }
+
+  private parseMarkdown(text: string): string {
+    if (!text) return '';
+    let html = text.replace(/^### (.*$)/gim, '<h4>$1</h4>');
+    html = html.replace(/^## (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^# (.*$)/gim, '<h2>$1</h2>');
+    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+    html = html.replace(/\n/gim, '<br>');
+    return html;
   }
 
   copyText(): void {
