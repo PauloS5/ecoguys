@@ -245,8 +245,8 @@ export class ReportsComponent implements OnInit {
   statesList: StateIBGE[] = [];
   availableCities: CityIBGE[] = [];
 
-  selectedStateSigla = 'AC';
-  selectedCity = 'Rio Branco';
+  selectedStateSigla = 'SP';
+  selectedCity = 'São Paulo';
   selectedPeriod = 'Últimos 7 dias';
 
   loadingStates = true;
@@ -328,7 +328,16 @@ export class ReportsComponent implements OnInit {
         this.availableCities = cities;
         this.loadingCities = false;
         if (cities.length > 0) {
-          this.selectedCity = cities[0].nome;
+          const cityExists = cities.find(c => c.nome === this.selectedCity);
+          
+          if (!cityExists) {
+            if (uf === 'SP') {
+              const capital = cities.find(c => c.nome === 'São Paulo');
+              this.selectedCity = capital ? capital.nome : cities[0].nome;
+            } else {
+              this.selectedCity = cities[0].nome;
+            }
+          }
         }
       });
   }

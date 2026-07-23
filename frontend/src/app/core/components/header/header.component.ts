@@ -147,8 +147,8 @@ export class HeaderComponent implements OnInit {
   statesList: StateIBGE[] = [];
   availableCities: CityIBGE[] = [];
 
-  selectedStateSigla = 'AC';
-  selectedCityName = 'Rio Branco';
+  selectedStateSigla = 'SP';
+  selectedCityName = 'São Paulo';
 
   loadingStates = true;
   loadingCities = false;
@@ -177,8 +177,8 @@ export class HeaderComponent implements OnInit {
         this.statesList = states;
         this.loadingStates = false;
         if (states.length > 0) {
-          this.selectedStateSigla = 'AC';
-          this.fetchCities('AC');
+          this.selectedStateSigla = 'SP';
+          this.fetchCities('SP');
         }
       });
   }
@@ -204,7 +204,18 @@ export class HeaderComponent implements OnInit {
         this.availableCities = cities;
         this.loadingCities = false;
         if (cities.length > 0) {
-          this.selectedCityName = cities[0].nome;
+          const cityExists = cities.find(c => c.nome === this.selectedCityName);
+          
+          if (!cityExists) {
+            // Se for SP, tenta achar a capital São Paulo, senão pega a primeira
+            if (uf === 'SP') {
+              const capital = cities.find(c => c.nome === 'São Paulo');
+              this.selectedCityName = capital ? capital.nome : cities[0].nome;
+            } else {
+              this.selectedCityName = cities[0].nome;
+            }
+          }
+          
           this.notifyEnvironmentService();
         }
       });

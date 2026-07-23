@@ -10,7 +10,7 @@ export class EnvironmentService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8000/api/v1';
 
-  selectedCity = signal<string>('Rio Branco - AC');
+  selectedCity = signal<string>('São Paulo - SP');
   mobileMenuOpen = signal<boolean>(false);
 
   indicators = signal<EnvironmentalIndicator[]>([
