@@ -101,8 +101,8 @@ interface CityIBGE {
             <button (click)="copyReport()" class="btn btn-glass btn-sm" title="Copiar texto do relatório">
               <i data-lucide="copy"></i> {{ copied ? 'Copiado!' : 'Copiar Texto' }}
             </button>
-            <button (click)="downloadReport()" class="btn btn-primary btn-sm" title="Baixar relatório em arquivo de texto">
-              <i data-lucide="download"></i> Baixar (.txt)
+            <button (click)="downloadReport()" class="btn btn-primary btn-sm outline">
+              <i data-lucide="download"></i> <span class="hide-mobile">Baixar (.doc)</span>
             </button>
           </div>
         </div>
@@ -364,13 +364,45 @@ export class ReportsComponent implements OnInit {
   }
 
   downloadReport(): void {
-    const text = this.gemmaService.currentReportText();
-    if (!text) return;
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const htmlContent = this.gemmaService.currentReportTextHtml();
+    if (!htmlContent) return;
+
+    const wordDocument = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset="utf-8">
+        <title>Relatório Ambiental - ${this.selectedCity}</title>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; color: #333; }
+          h2 { color: #2E7D32; font-size: 24px; margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+          h3 { color: #388E3C; font-size: 20px; margin-top: 20px; }
+          h4 { color: #4CAF50; font-size: 16px; margin-top: 15px; }
+          p { font-size: 14px; line-height: 1.6; text-align: justify; }
+          strong { color: #1B5E20; }
+          .header-doc { text-align: center; margin-bottom: 30px; }
+          .logo { font-size: 28px; font-weight: bold; color: #2E7D32; }
+          .meta { font-size: 12px; color: #666; margin-top: 5px; }
+        </style>
+      </head>
+      <body>
+        <div class="header-doc">
+          <div class="logo">EcoWatch AI</div>
+          <div class="meta">Relatório Oficial de Monitoramento Ambiental</div>
+          <div class="meta">Local: ${this.selectedCity} - ${this.selectedStateSigla} | Período: ${this.selectedPeriod}</div>
+          <div class="meta">Emissão: ${this.gemmaService.currentReportDate()}</div>
+        </div>
+        ${htmlContent}
+        <br><br><hr>
+        <p style="text-align: center; font-size: 10px; color: #999;">Documento gerado por Inteligência Artificial (Gemma) via EcoWatch AI.</p>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(['\ufeff', wordDocument], { type: 'application/msword' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `relatorio-ambiental-${this.selectedCity}.txt`;
+    link.download = `Relatorio_Ambiental_${this.selectedCity}.doc`;
     link.click();
     window.URL.revokeObjectURL(url);
   }
