@@ -262,8 +262,14 @@ export class ReportsComponent implements OnInit {
       if (globalCity) {
         const parts = globalCity.split('-');
         if (parts.length >= 2) {
-          this.selectedCity = parts[0].trim();
-          this.selectedStateSigla = parts[1].trim();
+          const newCity = parts[0].trim();
+          const newState = parts[1].trim();
+          
+          if (this.selectedStateSigla !== newState) {
+            this.selectedStateSigla = newState;
+            this.fetchCities(this.selectedStateSigla);
+          }
+          this.selectedCity = newCity;
         }
       }
     });
@@ -293,7 +299,9 @@ export class ReportsComponent implements OnInit {
         this.statesList = states;
         this.loadingStates = false;
         if (states.length > 0) {
-          this.selectedStateSigla = states[0].sigla;
+          if (!this.selectedStateSigla) {
+            this.selectedStateSigla = states[0].sigla;
+          }
           this.fetchCities(this.selectedStateSigla);
         }
       });
