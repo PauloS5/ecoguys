@@ -352,9 +352,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   selectedMunicipalityName = '';
 
   mapLayers = [
-    { id: 'indicators', label: 'Indicadores', active: true },
-    { id: 'alerts', label: 'Alertas Ativos', active: true },
-    { id: 'risk', label: 'Focos de Calor', active: true }
+    { id: 'risk', label: 'Focos de Calor (Em Tempo Real)', active: true }
   ];
 
   private tileUrls = {
@@ -571,6 +569,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.selectedMunicipalityName = name;
     this.showPanel = true;
     this.mapService.navigateToMunicipality(stateCode, municipalityCode, name);
+    
+    // Sincroniza a seleção do mapa com o estado global da aplicação
+    const sigla = this.mapService.getStateSigla(stateCode);
+    this.envService.updateCity(`${name} - ${sigla}`);
+    
     setTimeout(() => this.refreshIcons(), 50);
   }
 

@@ -39,7 +39,7 @@ export class MapService {
 
     this.isLoading.set(true);
     try {
-      const url = `${this.IBGE_BASE}/paises/BR?formato=application/vnd.geo+json&intrarregiao=UF&qualidade=2`;
+      const url = `${this.IBGE_BASE}/paises/BR?formato=application/vnd.geo+json&intrarregiao=UF`;
       const response = await fetch(url);
       if (!response.ok) throw new Error('Erro ao carregar estados');
       const data = await response.json();
@@ -58,10 +58,35 @@ export class MapService {
 
     this.isLoading.set(true);
     try {
-      const url = `${this.IBGE_BASE}/estados/${codUF}?formato=application/vnd.geo+json&intrarregiao=municipio&qualidade=2`;
+      const url = `${this.IBGE_BASE}/estados/${codUF}?formato=application/vnd.geo+json&intrarregiao=municipio`;
       const response = await fetch(url);
       if (!response.ok) throw new Error('Erro ao carregar municípios');
       const data = await response.json();
+      
+      try {
+        const namesUrl = `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${codUF}/municipios`;
+        const namesRes = await fetch(namesUrl);
+        if (namesRes.ok) {
+          const namesData = await namesRes.json();
+          const nameMap = new Map();
+          namesData.forEach((city: any) => {
+            nameMap.set(city.id.toString(), city.nome);
+          });
+          
+          if (data.features) {
+            data.features.forEach((feature: any) => {
+              const code = feature.properties?.codarea || feature.id;
+              if (code && nameMap.has(code.toString())) {
+                feature.properties = feature.properties || {};
+                feature.properties.nome = nameMap.get(code.toString());
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.warn('Erro ao mapear nomes dos municípios:', e);
+      }
+      
       this.cache.set(cacheKey, data);
       return data;
     } finally {

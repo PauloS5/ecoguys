@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -55,9 +55,10 @@ interface CityIBGE {
       </div>
 
       <div class="header-right">
-        <button (click)="refreshData()" class="btn btn-secondary btn-sm" title="Carregar / Atualizar dados">
-          <i data-lucide="refresh-cw"></i>
-          <span class="hide-mobile">Atualizar Dados</span>
+        <button (click)="refreshData()" [disabled]="isRefreshing" class="btn btn-secondary btn-sm" title="Carregar / Atualizar dados">
+          <span *ngIf="!isRefreshing"><i data-lucide="refresh-cw"></i></span>
+          <span *ngIf="isRefreshing"><i data-lucide="loader" class="spin"></i></span>
+          <span class="hide-mobile">{{ isRefreshing ? 'Atualizando...' : 'Atualizar Dados' }}</span>
         </button>
       </div>
     </header>
@@ -147,11 +148,36 @@ export class HeaderComponent implements OnInit {
   statesList: StateIBGE[] = [];
   availableCities: CityIBGE[] = [];
 
-  selectedStateSigla = 'AC';
-  selectedCityName = 'Rio Branco';
+  selectedStateSigla = 'SP';
+  selectedCityName = 'São Paulo';
 
   loadingStates = true;
   loadingCities = false;
+  isRefreshing = false;
+
+  constructor() {
+    effect(() => {
+      const globalCity = this.envService.selectedCity();
+      if (globalCity) {
+        const parts = globalCity.split(' - ');
+        if (parts.length === 2) {
+          const [city, state] = parts;
+          let changed = false;
+          
+          if (this.selectedStateSigla !== state) {
+            this.selectedStateSigla = state;
+            this.fetchCities(state, false);
+            changed = true;
+          }
+          
+          if (this.selectedCityName !== city) {
+            this.selectedCityName = city;
+            changed = true;
+          }
+        }
+      }
+    }, { allowSignalWrites: true });
+  }
 
   ngOnInit(): void {
     this.fetchStates();
@@ -177,8 +203,8 @@ export class HeaderComponent implements OnInit {
         this.statesList = states;
         this.loadingStates = false;
         if (states.length > 0) {
-          this.selectedStateSigla = 'AC';
-          this.fetchCities('AC');
+          this.selectedStateSigla = 'SP';
+          this.fetchCities('SP');
         }
       });
   }
@@ -189,7 +215,7 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  fetchCities(uf: string): void {
+  fetchCities(uf: string, notifyAfter: boolean = true): void {
     this.loadingCities = true;
     this.http.get<CityIBGE[]>(`${this.ibgeUrl}/estados/${uf}/municipios?orderBy=nome`)
       .pipe(
@@ -204,8 +230,23 @@ export class HeaderComponent implements OnInit {
         this.availableCities = cities;
         this.loadingCities = false;
         if (cities.length > 0) {
-          this.selectedCityName = cities[0].nome;
-          this.notifyEnvironmentService();
+          const cityExists = cities.find(c => c.nome === this.selectedCityName);
+          let defaulted = false;
+          
+          if (!cityExists) {
+            // Se for SP, tenta achar a capital São Paulo, senão pega a primeira
+            if (uf === 'SP') {
+              const capital = cities.find(c => c.nome === 'São Paulo');
+              this.selectedCityName = capital ? capital.nome : cities[0].nome;
+            } else {
+              this.selectedCityName = cities[0].nome;
+            }
+            defaulted = true;
+          }
+          
+          if (notifyAfter || defaulted) {
+            this.notifyEnvironmentService();
+          }
         }
       });
   }
@@ -224,6 +265,17 @@ export class HeaderComponent implements OnInit {
   }
 
   refreshData(): void {
+    this.isRefreshing = true;
     this.notifyEnvironmentService();
+    
+    // Feedback visual para o usuário
+    setTimeout(() => {
+      this.isRefreshing = false;
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && (window as any).lucide) {
+          (window as any).lucide.createIcons();
+        }
+      }, 50);
+    }, 800);
   }
 }

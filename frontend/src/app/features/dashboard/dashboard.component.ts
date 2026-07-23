@@ -104,8 +104,8 @@ declare const Chart: any;
         <div class="chart-panel glass-panel mt-4">
           <div class="panel-header mb-3">
             <div>
-              <h3><i data-lucide="bar-chart-3" class="inline-icon"></i> Environmental Analytics</h3>
-              <p class="panel-subtitle">Análise histórica mensal com barras arredondadas e curva de tendência</p>
+              <h3><i data-lucide="bar-chart-3" class="inline-icon"></i> Histórico de Qualidade do Ar e Temperatura</h3>
+              <p class="panel-subtitle">Variação climática e poluição (AQI) ao longo do ano em {{ envService.selectedCity() }}</p>
             </div>
           </div>
           <div class="chart-container-box">
@@ -314,7 +314,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
               datasets: [
                 {
                   type: 'line',
-                  label: 'Tendência de Indicadores',
+                  label: 'Temperatura Média (°C)',
                   data: res.lineData || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   borderColor: '#2E7D32',
                   backgroundColor: 'rgba(76, 175, 80, 0.15)',
@@ -329,7 +329,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
                 },
                 {
                   type: 'bar',
-                  label: 'Volume Monitorado',
+                  label: 'Poluição do Ar (AQI)',
                   data: res.barData || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   backgroundColor: 'rgba(46, 125, 50, 0.8)',
                   hoverBackgroundColor: '#2E7D32',
