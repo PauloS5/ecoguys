@@ -62,6 +62,31 @@ export class MapService {
       const response = await fetch(url);
       if (!response.ok) throw new Error('Erro ao carregar municípios');
       const data = await response.json();
+      
+      try {
+        const namesUrl = `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${codUF}/municipios`;
+        const namesRes = await fetch(namesUrl);
+        if (namesRes.ok) {
+          const namesData = await namesRes.json();
+          const nameMap = new Map();
+          namesData.forEach((city: any) => {
+            nameMap.set(city.id.toString(), city.nome);
+          });
+          
+          if (data.features) {
+            data.features.forEach((feature: any) => {
+              const code = feature.properties?.codarea || feature.id;
+              if (code && nameMap.has(code.toString())) {
+                feature.properties = feature.properties || {};
+                feature.properties.nome = nameMap.get(code.toString());
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.warn('Erro ao mapear nomes dos municípios:', e);
+      }
+      
       this.cache.set(cacheKey, data);
       return data;
     } finally {
