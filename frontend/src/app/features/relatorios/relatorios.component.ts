@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { EnvironmentService } from '../../core/services/environment.service';
+import { GemmaAiService } from '../../core/services/gemma-ai.service';
 
 declare const lucide: any;
 
