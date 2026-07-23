@@ -352,9 +352,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   selectedMunicipalityName = '';
 
   mapLayers = [
-    { id: 'indicators', label: 'Indicadores', active: true },
-    { id: 'alerts', label: 'Alertas Ativos', active: true },
-    { id: 'risk', label: 'Focos de Calor', active: true }
+    { id: 'risk', label: 'Focos de Calor (Em Tempo Real)', active: true }
   ];
 
   private tileUrls = {
