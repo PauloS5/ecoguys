@@ -86,9 +86,9 @@ app.add_middleware(
     allow_headers=["*"],  # Permite todos os cabeçalhos
 )
 
-# Inicializa o cliente da OpenAI apontando para o servidor local do LM Studio
+# Inicializa o cliente da OpenAI apontando para o servidor local exposto no Ngrok (Para os amigos usarem)
 client = OpenAI(
-    base_url="http://127.0.0.1:1234/v1", 
+    base_url="https://clamshell-rescuer-creasing.ngrok-free.dev/v1", 
     api_key="lm-studio"
 )
 
