@@ -6,6 +6,14 @@ Plataforma web de monitoramento ambiental com inteligência artificial, desenvol
 
 O **EcoWatch AI** é um sistema de acompanhamento de indicadores ambientais (temperatura, umidade, qualidade do ar, focos de queimadas, entre outros) que utiliza **inteligência artificial (Gemma AI)** para interpretar dados, responder dúvidas e gerar relatórios automáticos em linguagem acessível.
 
+## 🌟 Principais Funcionalidades
+
+- 🗺️ **Mapa Interativo Integrado (Drill-down)**: Navegação imersiva (Brasil ➔ Estado ➔ Município) construída com Leaflet e IBGE Malhas API V3. Os cliques no mapa sincronizam toda a aplicação instantaneamente em nível global através de Angular Signals.
+- 📄 **Relatórios Inteligentes (Exportação para Word)**: A Inteligência Artificial analisa os dados locais e gera relatórios executivos estruturados, que podem ser copiados ou exportados nativamente para **.doc (Microsoft Word)** com estilização e formatação limpa.
+- 🤖 **Assistente Gemma AI**: Chat conversacional com memória que ajuda a entender os impactos ambientais e prever tendências climáticas na região selecionada.
+- 📊 **Dashboard & Analytics**: Monitoramento de 9 indicadores em tempo real, além de um histórico visual (Gráficos) sobre o Índice de Poluição do Ar (AQI) e Variação de Temperatura.
+- 🔄 **Reatividade e UX Premium**: Feedback visual imediato nas interações, *Glassmorphism* (efeitos de vidro) na interface e um "Dark Neon" basemap customizado para visualização de focos de calor.
+
 ---
 
 ## 🛠️ Tecnologias Utilizadas
