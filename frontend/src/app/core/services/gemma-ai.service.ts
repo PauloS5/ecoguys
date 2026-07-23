@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ChatMessage, AutomaticReport } from '../models/environment.model';
+import { EnvironmentService } from './environment.service';
 import { catchError, of } from 'rxjs';
 
 @Injectable({
@@ -8,6 +9,7 @@ import { catchError, of } from 'rxjs';
 })
 export class GemmaAiService {
   private http = inject(HttpClient);
+  private envService = inject(EnvironmentService);
   // URL correta do nosso backend FastAPI
   private apiUrl = 'http://127.0.0.1:8000/api';
 
@@ -45,8 +47,23 @@ export class GemmaAiService {
     this.isTyping.set(true);
 
     // 2. Envia a requisição real de chat para o backend local/servidor
-    // Mudamos "message" para "prompt" para bater com o ChatRequest do main.py
-    this.http.post<{ response: string }>(`${this.apiUrl}/chat`, { prompt: question })
+    // Pega a cidade global para a IA saber de onde estamos falando!
+    let reqCidade = 'São Paulo';
+    let reqUf = 'SP';
+    const globalCity = this.envService.selectedCity();
+    if (globalCity) {
+      const parts = globalCity.split('-');
+      if (parts.length >= 2) {
+        reqCidade = parts[0].trim();
+        reqUf = parts[1].trim();
+      }
+    }
+
+    this.http.post<{ response: string }>(`${this.apiUrl}/chat`, { 
+      prompt: question,
+      cidade: reqCidade,
+      uf: reqUf
+    })
       .pipe(
         catchError(() => {
           // Fallback amigável caso a IA esteja temporariamente offline ou a internet caia
